@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtCore import Qt, QFile, QTextStream, Signal, QTimer, QObject, QEvent, QThread
-from PySide6.QtGui import QIcon, QAction, QKeySequence
+from PySide6.QtGui import QIcon, QAction, QKeySequence, QResizeEvent
 
 from osdagbridge_desktop.ui.docks.input_dock import InputDock
 from osdagbridge_desktop.ui.docks.output_dock import OutputDock
@@ -126,6 +126,9 @@ class CustomWindow(QWidget):
         # Snapshot of input_dict right after solve_extend_basic_input_dict (i.e. when
         # required fields changed). Used by the dialog's Defaults button.
         self._ai_initial_defaults: dict | None = None
+        
+        # Resize on initial show
+        self._initial_resize_done = False
       
         # AdditionalInputs - Created once on first use, shown/hidden thereafter.
         self._get_additional_inputs()
@@ -1614,6 +1617,23 @@ class CustomWindow(QWidget):
         except (IndexError, RuntimeError, AttributeError):
             # Being deleted, ignore
             return
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not self._initial_resize_done:
+            self._initial_resize_done = True
+            QTimer.singleShot(0, self.force_resize)
+
+    def force_resize(self):
+        """Re-run layout sizing with the real window geometry."""
+        self.resizeEvent(QResizeEvent(self.size(), self.size()))
+        # resizeEvent only sizes the horizontal splitter; re-apply 4:1 on cad_log_splitter
+        if self.cad_3d_view_active:
+            self._set_central_view('3d')
+        elif self.plots_view_active:
+            self._set_central_view('plots')
+        else:
+            self._set_central_view('dual')
 
     def save3DcadImages(self, backend):
         """
