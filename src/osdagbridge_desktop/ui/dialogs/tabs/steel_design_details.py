@@ -28,6 +28,7 @@ from osdagbridge_core.bridge_types.plate_girder.ui_fields_additional_input impor
     STEEL_DESIGN_DETAILS_SCHEMA,
 )
 from osdagbridge_core.utils.common import (
+    KEY_MP_GD_SEGMENT_TABLE,
     KEY_SD_GRADE_OF_MATERIAL,
     KEY_SD_SECTION_TYPE,
     KEY_SD_SECTION_DESIGNATION,
@@ -650,7 +651,10 @@ class SteelDesignDetailsTab(QWidget):
             except:
                 pass
                 
-            segments = [{"id": "G1M1", "start": 0.0, "end": length_m, "length": length_m}]
+            # First member of the selected girder, from its segment table; without a table there is nothing to draw.
+            seg_table = output_dict.get(f"{KEY_MP_GD_SEGMENT_TABLE}.G{self._girder_index + 1}") or []
+            member_id = seg_table[0].get("id") if seg_table else None
+            segments = [{"id": member_id, "start": 0.0, "end": length_m, "length": length_m}] if member_id else []
 
             # Drive the CAD from the same normalized values shown in the table so
             # the preview always matches the displayed stiffener details. The CAD
@@ -677,10 +681,10 @@ class SteelDesignDetailsTab(QWidget):
                 KEY_SD_SHEAR_LONGITUDINAL_SPACING: normalized_state.get("shear_longitudinal_spacing"),
             }
 
-            stiffener_by_member = {"G1M1": stiff_state}
-            
+            stiffener_by_member = {member_id: stiff_state}
+
             section_dims = {
-                "G1M1": {
+                member_id: {
                     "depth_mm": depth,
                     "top_flange_thickness_mm": tf_t,
                     "bottom_flange_thickness_mm": bf_t
@@ -690,6 +694,6 @@ class SteelDesignDetailsTab(QWidget):
             self.stiffener_preview.set_data(
                 segments=segments,
                 stiffener_by_member=stiffener_by_member,
-                active_member_id="G1M1",
+                active_member_id=member_id,
                 section_dims_by_member=section_dims
             )
