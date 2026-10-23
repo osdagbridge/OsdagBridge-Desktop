@@ -958,7 +958,7 @@ class CustomWindow(QWidget):
         """Save as project: .osi at the user's path, report.pdf in the app's report folder."""
         import datetime, pathlib
         from pathlib import Path
-        from osdag_home.data.database.database_config import (
+        from osdagbridge_desktop.osdag_home.data.database.database_config import (
             PROJECT_NAME, PROJECT_PATH, MODULE_KEY, REPORT_FILE_PATH,
             insert_recent_project, get_project_by_id,
         )
