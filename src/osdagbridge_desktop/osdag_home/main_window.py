@@ -1415,7 +1415,7 @@ class MainWindow(QMainWindow):
         self.tab_bar.setTabText(index, title)
 
         # Update Recent Module
-        from osdag_home.data.database.database_config import insert_recent_module
+        from osdagbridge_desktop.osdag_home.data.database.database_config import insert_recent_module
         insert_recent_module(backend.module_name())
 
         self.tab_widget.setEnabled(True)
