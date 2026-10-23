@@ -3,7 +3,7 @@ from importlib.resources import files
 
 from osdagbridge_core.utils.common import KEY_MODULE_PLATE_GIRDER
 
-SQLITE_FILE = files('osdag_home.data.database')/ 'user_data.sqlite'
+SQLITE_FILE = files('osdagbridge_desktop.osdag_home.data.database')/ 'user_data.sqlite'
 
 PROJECT_TABLE = 'recent_projects'
 MODULE_TABLE = 'recent_modules'
