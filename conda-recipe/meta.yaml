@@ -12,8 +12,8 @@ build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv
   entry_points:
-    - osdagbridge=osdagbridge_desktop.__main__:main
-    - osdagbridge-desktop=osdagbridge_desktop.__main__:main
+    - osdagbridge=osdagbridge_desktop.osdag_home.__main__:main
+    - osdagbridge-desktop=osdagbridge_desktop.osdag_home.__main__:main
 
 requirements:
   host:
