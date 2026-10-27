@@ -278,27 +278,10 @@ def main():
     # taskbar uses our icon, not the host Python interpreter's.
     _set_windows_app_id()
 
-    # Create the Qt application instance
-    app = QApplication(sys.argv)
-
-    # Application-wide icon: taskbar, Alt-Tab, and default window icon.
-    icon = _app_icon()
-    if not icon.isNull():
-        app.setWindowIcon(icon)
-
-    # Load and apply the global stylesheet
-    stylesheet = load_stylesheet()
-    if stylesheet:
-        app.setStyleSheet(stylesheet)
-
-    window = CustomWindow("OsdagBridge", PlateGirderBridge)
-    if not icon.isNull():
-        window.setWindowIcon(icon)
-    window.showMaximized()
-    window.show()
-
-    # Execute the event loop
-    sys.exit(app.exec())
+    # Launch Osdag Home GUI
+    from osdagbridge_desktop.osdag_home.__main__ import gui
+    gui()
 
 if __name__ == "__main__":
     main()
+
