@@ -100,5 +100,8 @@ def gui():
     splash.show()
     sys.exit(app.exec())
 
+main = gui
+
 if __name__ == "__main__":
     gui()
+
