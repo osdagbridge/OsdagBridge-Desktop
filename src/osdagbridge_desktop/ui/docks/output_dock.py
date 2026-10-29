@@ -745,6 +745,50 @@ class OutputDock(QWidget):
             except Exception as exc:
                 logger.warning("Could not capture cross bracing / end diaphragm figures: %s", exc)
 
+            # Deck reinforcement CAD preview: capture the existing
+            # Deck Design CAD widget as PNG bytes for the report.
+            try:
+                from osdagbridge_desktop.ui.dialogs.deck_design import (
+                    DeckReinforcementCADWidget,
+                )
+
+                _out = getattr(self.backend, "output_dict", {}) or {}
+                _deck_results = _out.get("deck_design_results", {}) or {}
+
+                if _deck_results:
+                    _deck_dialog = getattr(
+                        self,
+                        "_deck_design_dialog",
+                        None,
+                    )
+                    _created_for_report = _deck_dialog is None
+
+                    if _deck_dialog is not None:
+                        # Reuse the existing Deck Design CAD widget.
+                        _deck_widget = (
+                            _deck_dialog
+                            .reinforcement_cad_card
+                            .cad_widget
+                        )
+                        _deck_png = _deck_widget.cached_png(_deck_results)
+                    else:
+                        # Fallback if Deck Design has not been opened.
+                        _deck_widget = DeckReinforcementCADWidget()
+                        _deck_widget.resize(900, 360)
+                        _deck_widget.set_data(_deck_results)
+                        _deck_widget.ensurePolished()
+                        _deck_png = _deck_widget.cached_png(_deck_results)
+
+                    figure_data["deck_reinforcement"] = _deck_png
+
+                    if _created_for_report:
+                        _deck_widget.deleteLater()
+
+            except Exception as exc:
+                logger.warning(
+                    "Could not capture deck reinforcement figure: %s",
+                    exc,
+                )
             # Analysis envelope plot: live plot widget → temp PNG → bytes → deleted.
             # Switch the central area to the plots view first (like the CAD does) so
             # the widget is visible and renders the right condition before capture.
@@ -920,7 +964,8 @@ class OutputDock(QWidget):
         if not self._require_design():
             return
         from osdagbridge_desktop.ui.dialogs.deck_design import DeckDesign
-        DeckDesign(parent=self.parent).exec()
+        self._deck_design_dialog = DeckDesign(parent=self.parent)
+        self._deck_design_dialog.exec()
 
     # ── Checkbox Interfaces ──────────────────────────────────────────────
 
@@ -945,4 +990,3 @@ class OutputDock(QWidget):
         output_dict = dict(getattr(self.backend, 'output_dict'))
         dlg = GenerateResultsDialog(parent=None, output_dict=output_dict)
         dlg.exec()
-
