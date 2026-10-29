@@ -1452,106 +1452,20 @@ class MainWindow(QMainWindow):
     # Common function to load osi file and also to open recent project
     # If osi_path=None -> it triggers Load Osi else trigger open recent project
     def common_osi_load(self, osi_path=None, id=None):
-        if osi_path is None:
-            osi_path, _ = QFileDialog.getOpenFileName(self, "Open Design", get_documents_folder(),
-                                                  "InputFiles(*.osi)")
-            
-        else:
-            if not Path(osi_path).exists():
-                result = CustomMessageBox(
-                    title="Warning",
-                    text="Osi File has been moved, File does not exist!",
-                    dialogType=MessageBoxType.Warning,
-                    buttons=["Locate Osi", "Remove Record"]
-                ).exec()
-                if result == "Locate Osi":
-                    file_dialog_path, _ = QFileDialog.getOpenFileName(self, "Locate Osi File", os.path.expanduser("~"), "InputFiles(*.osi)")
-                    if file_dialog_path and id is not None:
-                        osi_path = file_dialog_path
-                        new_name = Path(osi_path).stem
-                        try:
-                            update_project_path(id, osi_path, new_name)
-                        except Exception as e:
-                            print(f"[ERROR] Failed to update project path: {e}")
-                    else:
-                        print("[INFO] No file selected for relocation.")
-                        return
-                elif result == "Remove Record":
-                    print("[INFO] Remove Record")
-                    if id is not None:
-                        try:
-                            delete_project_record(id)
-                            # Also delete the latex files for this project
-                            import shutil
-                            report_folder = f"osdag_home/data/reports/file_{id}"
-                            try:
-                                shutil.rmtree(report_folder)
-                            except FileNotFoundError:
-                                pass
-                            except Exception as e:
-                                print(f"[ERROR] Failed to delete report folder: {e}")
-                            CustomMessageBox(
-                                title="Record Removed",
-                                text="The record has been removed from recent projects.",
-                                dialogType=MessageBoxType.Information
-                            ).exec()
-                            # Update Home page with deleted project
-                            self.main_widget_instance.show_home()
 
-                        except Exception as e:
-                            CustomMessageBox(
-                                title="Error",
-                                text=f"Failed to remove record: {e}",
-                                dialogType=MessageBoxType.Critical
-                            ).exec()
-                    else:
-                        print("[INFO] No ID provided for record removal.")
-                    return
-
-        if not osi_path:
-            print("[INFO] No Path selected!")
+        filePath, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Design Inputs",
+            get_documents_folder(),
+            "Input Files (*.osi)",
+        )
+        if not filePath:
             return
-        try:
-            in_file = str(osi_path)
-            with open(in_file, 'r') as fileObject:
-                uiObj = yaml.safe_load(fileObject)
-            module = uiObj[KEY_MODULE]
-
-            print(f"[INFO] Osi File Belongs to: {module}")
-
-            func = get_module_function(module)
-            if func == 'None':
-                CustomMessageBox(
-                    title="Information",
-                    text="Please load the appropriate Input",
-                    dialogType=MessageBoxType.Information
-                ).exec()
-                print("[INFO] Module Under Development.")
-                return
-            func = getattr(self, func)
-            func()
-            # Set variables in template page because it is opened project.
-            # Deferred: bridge modules build on the next event-loop pass, so
-            # main_widget_instance isn't the module widget yet at this point.
-            def _apply_loaded_inputs():
-                inst = self.main_widget_instance
-                if module == KEY_MODULE_PLATE_GIRDER:
-                    if not inst.load_osi_from_path(osi_path, notify=False):
-                        return
-                else:
-                    inst.setDictToUserInputs(uiObj)
-                inst.project_id = id
-                inst.save_state = True
-
-            QTimer.singleShot(0, _apply_loaded_inputs)
-
-        except IOError:
-            CustomMessageBox(
-                title="Unable to open file",
-                text="There was an error opening \"%s\"" % osi_path,
-                dialogType=MessageBoxType.Critical
-            ).exec()
-            return    
+        
+        # Open Module
+        self.open_plategirder_bridge()
+        # Load OSI using exisitng function from osdagbridge/template_page.py
+        self.main_widget_instance.load_osi_from_path(filePath)
 
     #-------------Functions-to-load-modules-in-Tabwidget-END------------------------------------
 
