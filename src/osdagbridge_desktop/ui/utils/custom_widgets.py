@@ -364,14 +364,24 @@ class CustomRadioButton(QRadioButton):
         return "<" in self._rich_text and ">" in self._rich_text
  
     def _doc(self) -> QTextDocument:
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        theme = getattr(app, "theme", "light") if app else "light"
+        text_color = "#FFFFFF" if theme == "dark" else "#1a1a1a"
+
         doc = QTextDocument()
         doc.setDefaultFont(self.font())
-        doc.setHtml(self._rich_text)
+        doc.setHtml(f"<span style='color: {text_color};'>{self._rich_text}</span>")
         return doc
  
     # ── Paint ────────────────────────────────────────────────────────────────
  
     def paintEvent(self, event):
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        theme = getattr(app, "theme", "light") if app else "light"
+        is_dark = (theme == "dark")
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
  
@@ -399,8 +409,9 @@ class CustomRadioButton(QRadioButton):
             painter.drawEllipse(dot_rect)
  
         else:
-            painter.setBrush(QColor("#ffffff"))
-            border = QColor("#2e7d32") if self.underMouse() else QColor("#9e9e9e")
+            circle_bg = QColor("#2b2b2b") if is_dark else QColor("#ffffff")
+            painter.setBrush(circle_bg)
+            border = QColor("#2e7d32") if self.underMouse() else (QColor("#666666") if is_dark else QColor("#9e9e9e"))
             painter.setPen(QPen(border, pw))
             painter.drawEllipse(circle_rect)
  
@@ -422,7 +433,10 @@ class CustomRadioButton(QRadioButton):
  
         else:
             text_rect = QRect(text_x, 0, self.width() - text_x, self.height())
-            painter.setPen(QColor("#1a1a1a") if self.isEnabled() else QColor("#9e9e9e"))
+            text_color = (
+                QColor("#FFFFFF") if is_dark else QColor("#1a1a1a")
+            ) if self.isEnabled() else QColor("#9e9e9e")
+            painter.setPen(text_color)
             painter.setFont(self.font())
             painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, self._rich_text)
  
