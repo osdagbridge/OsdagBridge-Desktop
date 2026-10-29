@@ -771,6 +771,8 @@ class OutputDock(QWidget):
 
     def _on_report_clicked(self):
         """Open the report dialog, passing the CAD generator and captured figures."""
+        if not self._require_design():
+            return
         # Find dialog host and trigger
         cad_generator = self._capture_data()
         main_window = self.parent

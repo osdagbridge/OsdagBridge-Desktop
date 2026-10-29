@@ -1985,7 +1985,7 @@ class CustomWindow(QWidget):
 
         create_report_action = QAction("Create Design Report", self)
         create_report_action.setShortcut(QKeySequence("Alt+C"))
-        create_report_action.triggered.connect(lambda _: self.open_report_dialog())
+        create_report_action.triggered.connect(lambda _: self.output_dock._on_report_clicked())
         file_menu.addAction(create_report_action)
 
         file_menu.addSeparator()
