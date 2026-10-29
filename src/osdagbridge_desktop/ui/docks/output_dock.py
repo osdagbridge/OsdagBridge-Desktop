@@ -813,6 +813,8 @@ class OutputDock(QWidget):
 
     def _on_report_clicked(self):
         """Open the report dialog, passing the CAD generator and captured figures."""
+        if not self._require_design():
+            return
         # Find dialog host and trigger
         if not self._require_design():
             return
