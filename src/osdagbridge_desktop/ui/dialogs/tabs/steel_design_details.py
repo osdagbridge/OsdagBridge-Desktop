@@ -72,6 +72,18 @@ from osdagbridge_core.utils.common import (
     KEY_MP_STIFFENER_INTERMEDIATE_SPACING,
     KEY_MP_STIFFENER_LONGITUDINAL,
     KEY_MP_STIFFENER_LONGITUDINAL_THICKNESS,
+    KEY_SD_SECTION_PROP_AREA,
+    KEY_SD_SECTION_PROP_IZ,
+    KEY_SD_SECTION_PROP_ZZ,
+    KEY_SD_SECTION_PROP_ZUZ,
+    KEY_SD_SECTION_PROP_MASS,
+    KEY_SD_SECTION_PROP_IV,
+    KEY_SD_SECTION_PROP_RZ,
+    KEY_SD_SECTION_PROP_RV,
+    KEY_SD_SECTION_PROP_ZV,
+    KEY_SD_SECTION_PROP_ZUV,
+    KEY_SD_SECTION_PROP_IT,
+    KEY_SD_SECTION_PROP_IW,
 )
 
 # Greyed-out read-only style for combos mirroring the Output Dock selection.
@@ -528,28 +540,29 @@ class SteelDesignDetailsTab(QWidget):
 
         sec_suf = _suffix_for(KEY_MP_GIRDER_SECTIONAL_AREA)
 
-        def _sec(base_key):
-            """Raw SI value in .2e format (matches the Girder Details tab)."""
-            v = output_dict.get(base_key + sec_suf)
+        def _sec(base_key, sd_factor=None):
+            """Raw SI value in .2e format (matches the Girder Details tab).
+            With sd_factor, base_key is a per-girder KEY_SD value (cm-based) scaled to SI."""
+            v = _sd(base_key) if sd_factor is not None else output_dict.get(base_key + sec_suf)
             if v is None or v == "":
                 return ""
             try:
-                return f"{float(v):.2e}"
+                return f"{float(v) * (sd_factor or 1):.2e}"
             except (TypeError, ValueError):
                 return _str(v)
 
-        out["mass"] = _sec(KEY_MP_GIRDER_MASS)
-        out["area"] = _sec(KEY_MP_GIRDER_SECTIONAL_AREA)
-        out["iz"]   = _sec(KEY_MP_GIRDER_SECTIONAL_IZ)
-        out["iv"]   = _sec(KEY_MP_GIRDER_SECTIONAL_IY)
-        out["rz"]   = _sec(KEY_MP_GIRDER_RADIUS_GYRATION_Z)
-        out["rv"]   = _sec(KEY_MP_GIRDER_RADIUS_GYRATION_Y)
-        out["zz"]   = _sec(KEY_MP_GIRDER_ELASTIC_MODULUS_ZZ)
-        out["zv"]   = _sec(KEY_MP_GIRDER_ELASTIC_MODULUS_ZY)
-        out["zuz"]  = _sec(KEY_MP_GIRDER_PLASTIC_MODULUS_ZUZ)
-        out["zuv"]  = _sec(KEY_MP_GIRDER_PLASTIC_MODULUS_ZUY)
-        out["it"]   = _sec(KEY_MP_GIRDER_TORSION_CONSTANT_IT)
-        out["iw"]   = _sec(KEY_MP_GIRDER_WARPING_CONSTANT_IW)
+        out["mass"] = _sec(KEY_SD_SECTION_PROP_MASS, 1)
+        out["area"] = _sec(KEY_SD_SECTION_PROP_AREA, 1e-4)
+        out["iz"]   = _sec(KEY_SD_SECTION_PROP_IZ, 1e-8)
+        out["iv"]   = _sec(KEY_SD_SECTION_PROP_IV, 1)
+        out["rz"]   = _sec(KEY_SD_SECTION_PROP_RZ, 1)
+        out["rv"]   = _sec(KEY_SD_SECTION_PROP_RV, 1)
+        out["zz"]   = _sec(KEY_SD_SECTION_PROP_ZZ, 1e-6)
+        out["zv"]   = _sec(KEY_SD_SECTION_PROP_ZV, 1)
+        out["zuz"]  = _sec(KEY_SD_SECTION_PROP_ZUZ, 1e-6)
+        out["zuv"]  = _sec(KEY_SD_SECTION_PROP_ZUV, 1)
+        out["it"]   = _sec(KEY_SD_SECTION_PROP_IT, 1)
+        out["iw"]   = _sec(KEY_SD_SECTION_PROP_IW, 1)
 
         # ─────────────────────────────────────────────────────────────────────────
         # STIFFENER DETAILS — per-member member_properties.stiffener_details.* keys.
