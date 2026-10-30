@@ -28,6 +28,32 @@ LAST_LOCATION_METHOD = None  # "location_name", "map", or "custom_data"
 LAST_LOCATION_DATA = None  # {"state": ..., "district": ...} or {"latitude": ..., "longitude": ...}
 LAST_CUSTOM_DATA = None  # {"wind_speed": ..., "zone": ..., "max_temp": ..., "min_temp": ...}
 
+def set_project_location_session(loc: dict | None) -> None:
+    """Set the module-level project location session state from a location dictionary."""
+    global LAST_LOCATION_METHOD, LAST_LOCATION_DATA, LAST_WEATHER_DATA, LAST_CUSTOM_DATA
+    if not isinstance(loc, dict) or not loc:
+        LAST_LOCATION_METHOD = None
+        LAST_LOCATION_DATA = None
+        LAST_WEATHER_DATA = None
+        LAST_CUSTOM_DATA = None
+        return
+
+    method = loc.get("method")
+    data = loc.get("data")
+    weather = loc.get("weather_data")
+
+    LAST_LOCATION_METHOD = method
+    LAST_WEATHER_DATA = weather
+
+    if method == "custom_data":
+        LAST_LOCATION_DATA = None
+        custom = loc.get("custom_weather_data")
+        LAST_CUSTOM_DATA = custom
+    else:
+        LAST_LOCATION_DATA = data
+        LAST_CUSTOM_DATA = None
+
+
 class NoScrollComboBox(QComboBox):
     def wheelEvent(self, event):
         event.ignore()  # Prevent changing selection on scroll
@@ -868,6 +894,7 @@ class ProjectLocationDialog(QDialog):
                 
                 self.state_combo.blockSignals(False)
                 self.district_combo.blockSignals(False)
+                self._update_location_display(district, state)
                 
             elif saved_method == "map":
                 self.method_radio_map.setChecked(True)
@@ -876,6 +903,8 @@ class ProjectLocationDialog(QDialog):
                 # Restore coordinates
                 lat = saved_location_data.get("latitude", "")
                 lon = saved_location_data.get("longitude", "")
+                station = saved_location_data.get("station", "")
+                state = saved_location_data.get("state", "")
                 
                 if lat:
                     self.latitude_input.setText(str(lat))
@@ -892,6 +921,8 @@ class ProjectLocationDialog(QDialog):
                             self.map_view.blockSignals(False)
                 except (ValueError, TypeError):
                     pass
+
+                self._update_location_display(station, state)
             
             # Restore weather data (from location-based lookup)
             if saved_weather_data:
@@ -1351,8 +1382,8 @@ class ProjectLocationDialog(QDialog):
             result['method'] = 'custom_data'
             result['data'] = {}
             result['weather_data'] = self.custom_weather_data or self._current_weather_data
-            result['display_text'] = ''
-            result['show_display'] = False
+            result['display_text'] = 'Custom Data'
+            result['show_display'] = True
         
         # Deprecated: kept for backward compatibility
         if self.method_custom_data.isChecked() and self.custom_weather_data:

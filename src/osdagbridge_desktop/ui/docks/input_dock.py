@@ -22,7 +22,9 @@ from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator, QIcon, 
 
 from osdagbridge_core.utils.common import *
 from osdagbridge_desktop.ui.utils.custom_buttons import DockCustomButton
-from osdagbridge_desktop.ui.dialogs.project_location import ProjectLocationDialog
+from osdagbridge_desktop.ui.dialogs.project_location import (
+    ProjectLocationDialog, set_project_location_session,
+)
 from osdagbridge_desktop.ui.docks.dock_utils import apply_field_style
 from osdagbridge_desktop.ui.dialogs.material_properties import (
     MaterialPropertiesDialog, sync_custom_materials_across_steel_members,
@@ -829,10 +831,18 @@ class InputDock(QWidget):
 
         loc = dialog.get_selected_location()
         self._update_input_dict(KEY_PROJECT_LOCATION, loc)
+        self._update_project_location_display(loc)
 
-        # Update display — all mapping is done inside get_selected_location()
-        display_text = loc.get("display_text", "")
-        show_display = loc.get("show_display", False)
+    def _update_project_location_display(self, loc: dict | None) -> None:
+        """Update the Project Location button info row and sync session state."""
+        set_project_location_session(loc)
+
+        if not isinstance(loc, dict) or not loc:
+            display_text = ""
+            show_display = False
+        else:
+            display_text = loc.get("display_text", "")
+            show_display = loc.get("show_display", False)
 
         info_lbl = self._w(f"{KEY_PROJECT_LOCATION}_info_label")
         info_row = self._w(f"{KEY_PROJECT_LOCATION}_info_row")
@@ -840,6 +850,11 @@ class InputDock(QWidget):
             info_lbl.setText(display_text or "Location not selected")
         if info_row:
             info_row.setVisible(show_display)
+
+        if show_display:
+            btn = self._w(KEY_PROJECT_LOCATION)
+            if btn:
+                self.reset_error_state(btn)
 
     # To open additional input from additional geometry
     def show_additional_inputs(self):
@@ -1090,6 +1105,15 @@ class InputDock(QWidget):
                 if widget.findText(text) < 0:
                     widget.addItem(text)
                 self._set_combo_silently(widget, text)
+
+        # Update Project Location display and session state
+        loc = data.get(KEY_PROJECT_LOCATION)
+        if hasattr(self.parent, "input_dict"):
+            self.parent.input_dict[KEY_PROJECT_LOCATION] = loc
+        self._update_project_location_display(loc)
+
+        if KEY_DESIGN_MODE in data and data[KEY_DESIGN_MODE]:
+            self._current_design_mode = str(data[KEY_DESIGN_MODE]).strip()
 
         # Mark required fields as changed so solve_extend_basic_input_dict
         # runs on the next Design call and derives all computed defaults.

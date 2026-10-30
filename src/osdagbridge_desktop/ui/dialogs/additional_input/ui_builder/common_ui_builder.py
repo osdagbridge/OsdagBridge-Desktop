@@ -1599,7 +1599,9 @@ class UIBuilder(QWidget):
         ai: the AdditionalInputs instance that owns the handler methods & all the widgets
         """
         for origin_key, target_key, handler_name in connectors:
-            handler = getattr(ai, handler_name)
+            handler = getattr(ai, handler_name, None)
+            if handler is None:
+                continue
 
             origin_widget = ai.findChild(QWidget, origin_key)
             target_widget = ai.findChild(QWidget, target_key)

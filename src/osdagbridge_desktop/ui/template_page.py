@@ -881,16 +881,18 @@ class CustomWindow(QWidget):
 
             self.input_dock.populate_from_dict(data)
 
-            # Sync additional inputs dialog if it has already been constructed
-            if self._additional_inputs_dialog is not None:
-                self._additional_inputs_dialog.set_input_dictionary(self.input_dict)
-
             # Refresh 2D CAD to reflect loaded values
             try:
                 solve_extend_basic_input_dict(self.input_dict)
                 self.cad_comp_widget.update_from_osdag_inputs(self.input_dict)
             except Exception:
                 pass
+
+            # Sync additional inputs dialog if it has already been constructed
+            if self._additional_inputs_dialog is not None:
+                self._additional_inputs_dialog.set_input_dictionary(self.input_dict)
+                if self.input_dock:
+                    self._additional_inputs_dialog.design_mode_trigger(self.input_dock._current_design_mode)
 
             CustomMessageBox(
                 title="Success",
