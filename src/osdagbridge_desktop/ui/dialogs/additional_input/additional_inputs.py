@@ -2312,39 +2312,42 @@ class AdditionalInputs(QDialog):
     # Maps each End Diaphragm field/CAD to (required Type values, optional checkbox key).
     _ED_VISIBILITY_MAP = {
         # Cross Bracing — fields
-        KEY_MP_ED_BRACING_TYPE:                (["Cross Bracing"], None, None),
-        KEY_MP_ED_BRACING_CONNECTION:          (["Cross Bracing"], None, None),
-        KEY_MP_ED_BRACING_SECTION:             (["Cross Bracing"], None, None),
-        KEY_MP_ED_BRACING_SECTION_DESIGNATION: (["Cross Bracing"], None, None),
-        KEY_MP_ED_TOP_CHORD:                   (["Cross Bracing"], None, None),
-        KEY_MP_ED_TOP_CHORD_SECTION_TYPE:      (["Cross Bracing"], None, None),
-        KEY_MP_ED_TOP_CHORD_SECTION_DESIG:     (["Cross Bracing"], None, None),
-        KEY_MP_ED_BOTTOM_CHORD:                (["Cross Bracing"], None, None),
-        KEY_MP_ED_BOTTOM_CHORD_SECTION_TYPE:   (["Cross Bracing"], None, None),
-        KEY_MP_ED_BOTTOM_CHORD_SECTION_DESIG:  (["Cross Bracing"], None, None),
+        KEY_MP_ED_BRACING_TYPE:                ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BRACING_CONNECTION:          ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BRACING_SECTION:             ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BRACING_SECTION_DESIGNATION: ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_TOP_CHORD:                   ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_TOP_CHORD_SECTION_TYPE:      ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_TOP_CHORD_SECTION_DESIG:     ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BOTTOM_CHORD:                ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BOTTOM_CHORD_SECTION_TYPE:   ([ED_TYPE_CROSS_BRACING], None, None),
+        KEY_MP_ED_BOTTOM_CHORD_SECTION_DESIG:  ([ED_TYPE_CROSS_BRACING], None, None),
     
-        # Rolled Beam — field
-        KEY_MP_ED_IS_SECTION: (["Rolled Beam"], None, None),
+        # Rolled Beam — fields
+        KEY_MP_ED_IS_SECTION:                  ([ED_TYPE_ROLLED_BEAM], None, None),
+        KEY_MP_ED_FLEXURE_TYPE:                ([ED_TYPE_ROLLED_BEAM], None, None),
+        KEY_MP_ED_TORSIONAL_RESTRAINT:         ([ED_TYPE_ROLLED_BEAM], None, None),
+        KEY_MP_ED_WARPING_RESTRAINT:           ([ED_TYPE_ROLLED_BEAM], None, None),
     
         # Welded Beam — fields
-        KEY_MP_ED_SYMMETRY:                (["Welded Beam"], None, None),
-        KEY_MP_ED_TOTAL_DEPTH:             (["Welded Beam"], None, None),
-        KEY_MP_ED_WEB_THICKNESS:           (["Welded Beam"], None, None),
-        KEY_MP_ED_TOP_FLANGE_WIDTH:        (["Welded Beam"], None, None),
-        KEY_MP_ED_TOP_FLANGE_THICKNESS:    (["Welded Beam"], None, None),
-        KEY_MP_ED_BOTTOM_FLANGE_WIDTH:     (["Welded Beam"], None, None),
-        KEY_MP_ED_BOTTOM_FLANGE_THICKNESS: (["Welded Beam"], None, None),
+        KEY_MP_ED_SYMMETRY:                ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_TOTAL_DEPTH:             ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_WEB_THICKNESS:           ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_TOP_FLANGE_WIDTH:        ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_TOP_FLANGE_THICKNESS:    ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_BOTTOM_FLANGE_WIDTH:     ([ED_TYPE_WELDED_BEAM], None, None),
+        KEY_MP_ED_BOTTOM_FLANGE_THICKNESS: ([ED_TYPE_WELDED_BEAM], None, None),
     
         # CAD previews — whole section, hidden via section id
-        KEY_MP_ED_BRACING_LAYOUT_CAD:      (["Cross Bracing"], None, KEY_MP_ED_BRACING_LAYOUT_SECTION),
-        KEY_MP_ED_BRACING_SECTION_PREVIEW: (["Cross Bracing"], None, KEY_MP_ED_BRACING_PREVIEW_SECTION),
-        KEY_MP_ED_TOP_CHORD_PREVIEW:       (["Cross Bracing"], KEY_MP_ED_TOP_CHORD, KEY_MP_ED_TOP_CHORD_PREVIEW_SECTION),
-        KEY_MP_ED_BOTTOM_CHORD_PREVIEW:    (["Cross Bracing"], KEY_MP_ED_BOTTOM_CHORD, KEY_MP_ED_BOTTOM_CHORD_PREVIEW_SECTION),
-        KEY_MP_ED_ROLLED_PREVIEW:          (["Rolled Beam"], None, KEY_MP_ED_ROLLED_PREVIEW_SECTION),
-        KEY_MP_ED_WELDED_PREVIEW:          (["Welded Beam"], None, KEY_MP_ED_WELDED_PREVIEW_SECTION),
+        KEY_MP_ED_BRACING_LAYOUT_CAD:      ([ED_TYPE_CROSS_BRACING], None, KEY_MP_ED_BRACING_LAYOUT_SECTION),
+        KEY_MP_ED_BRACING_SECTION_PREVIEW: ([ED_TYPE_CROSS_BRACING], None, KEY_MP_ED_BRACING_PREVIEW_SECTION),
+        KEY_MP_ED_TOP_CHORD_PREVIEW:       ([ED_TYPE_CROSS_BRACING], KEY_MP_ED_TOP_CHORD, KEY_MP_ED_TOP_CHORD_PREVIEW_SECTION),
+        KEY_MP_ED_BOTTOM_CHORD_PREVIEW:    ([ED_TYPE_CROSS_BRACING], KEY_MP_ED_BOTTOM_CHORD, KEY_MP_ED_BOTTOM_CHORD_PREVIEW_SECTION),
+        KEY_MP_ED_ROLLED_PREVIEW:          ([ED_TYPE_ROLLED_BEAM], None, KEY_MP_ED_ROLLED_PREVIEW_SECTION),
+        KEY_MP_ED_WELDED_PREVIEW:          ([ED_TYPE_WELDED_BEAM], None, KEY_MP_ED_WELDED_PREVIEW_SECTION),
     
         # Section Properties — whole section, hidden via section id (one representative field; all 10 share the card)
-        KEY_MP_ED_MASS: (["Rolled Beam", "Welded Beam"], None, KEY_MP_ED_SECTION_PROPERTIES_SECTION),
+        KEY_MP_ED_MASS: ([ED_TYPE_ROLLED_BEAM, ED_TYPE_WELDED_BEAM], None, KEY_MP_ED_SECTION_PROPERTIES_SECTION),
     }
     
     def _apply_ed_visibility(self) -> None:
@@ -2537,12 +2540,13 @@ class AdditionalInputs(QDialog):
             KEY_MP_ED_TOP_FLANGE_WIDTH, KEY_MP_ED_TOP_FLANGE_THICKNESS,
             KEY_MP_ED_BOTTOM_FLANGE_WIDTH, KEY_MP_ED_BOTTOM_FLANGE_THICKNESS,
             KEY_MP_ED_ROLLED_PREVIEW, KEY_MP_ED_WELDED_PREVIEW,
+            ED_TYPE_ROLLED_BEAM, ED_TYPE_WELDED_BEAM,
         )
 
         ed_type_w = self.findChild(QComboBox, KEY_MP_ED_TYPE)
-        ed_type   = ed_type_w.currentText() if ed_type_w else "Rolled Beam"
+        ed_type   = ed_type_w.currentText() if ed_type_w else ED_TYPE_ROLLED_BEAM
 
-        if ed_type == "Rolled Beam":
+        if ed_type == ED_TYPE_ROLLED_BEAM:
             widget = self.findChild(RolledSectionPreview, KEY_MP_ED_ROLLED_PREVIEW)
             if widget is None:
                 return
@@ -2559,22 +2563,9 @@ class AdditionalInputs(QDialog):
                 widget._caption = f"Rolled Section • {designation}"
                 widget.update()
             else:
-                outline = catalog.get_rolled_section(str(designation).strip())
-                if outline:
-                    widget.set_dimensions(
-                        depth_mm=outline["depth_mm"],
-                        flange_width_mm=outline["top_flange_width_mm"],
-                        bottom_flange_width_mm=outline["bottom_flange_width_mm"],
-                        web_thickness_mm=outline["web_thickness_mm"],
-                        flange_thickness_mm=outline["top_flange_thickness_mm"],
-                        bottom_flange_thickness_mm=outline["bottom_flange_thickness_mm"],
-                    )
-                    widget._caption = f"Rolled Section • {designation}"
-                    widget.update()
-                else:
-                    widget.clear()
+                widget.clear()
 
-        else:  # Welded Beam
+        elif ed_type == ED_TYPE_WELDED_BEAM:
             widget = self.findChild(RolledSectionPreview, KEY_MP_ED_WELDED_PREVIEW)
             if widget is None:
                 return
@@ -2702,6 +2693,9 @@ class AdditionalInputs(QDialog):
         KEY_MP_ED_TOP_CHORD_SECTION_TYPE,    KEY_MP_ED_TOP_CHORD_SECTION_DESIG,
         KEY_MP_ED_BOTTOM_CHORD_SECTION_TYPE, KEY_MP_ED_BOTTOM_CHORD_SECTION_DESIG,
         KEY_MP_ED_IS_SECTION,
+        KEY_MP_ED_FLEXURE_TYPE,
+        KEY_MP_ED_TORSIONAL_RESTRAINT,
+        KEY_MP_ED_WARPING_RESTRAINT,
         KEY_MP_ED_SYMMETRY,
         KEY_MP_ED_TOTAL_DEPTH,               KEY_MP_ED_WEB_THICKNESS,
         KEY_MP_ED_TOP_FLANGE_WIDTH,          KEY_MP_ED_TOP_FLANGE_THICKNESS,
