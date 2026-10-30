@@ -737,11 +737,13 @@ class AdditionalInputs(QDialog):
 
         # Refresh railing for correct compute value
         rl_type = self.findChild(QComboBox, KEY_RL_TYPE)
-        if rl_type:
+        if rl_type and rl_type.currentText().strip() != "Custom":
             cur = rl_type.currentText()
             other = "IRC 5 - Steel Railing" if cur != "IRC 5 - Steel Railing" else "IRC 5 - RCC Railing"
             rl_type.setCurrentText(other)
             rl_type.setCurrentText(cur)
+        elif rl_type and str(self.working_input_dict.get(KEY_RL_LOAD_MODE) or "").strip() == "Custom":
+            self._set_enabled(self.findChild(QLineEdit, KEY_RL_LOAD_VALUE), True)
 
         # Refresh wearing course for correct compute value
         wc_mat = self.findChild(QComboBox, KEY_WC_MATERIAL)
