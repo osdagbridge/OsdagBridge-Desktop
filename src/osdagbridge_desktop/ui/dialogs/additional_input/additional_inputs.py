@@ -1475,7 +1475,8 @@ class AdditionalInputs(QDialog):
         gi, mi = self._get_current_girder_member_indices()
         for key, value in dims.items():
             self.working_input_dict[f"{key}.G{gi}.M{mi}"] = value
-            self.working_input_dict[key] = value  # un-suffixed key, read first by edge beams
+            if gi == 1 and mi == 1:
+                self.working_input_dict[key] = value
 
     def _get_current_girder_member_indices(self) -> tuple[int, int]:  # utility: returns (girder_index, member_index) 1-based from current combo selections
         girder_combo = self.findChild(QComboBox, KEY_MP_GD_SELECT_GIRDER)
