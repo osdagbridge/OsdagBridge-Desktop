@@ -1011,10 +1011,9 @@ class SteelDesign(QDialog):
         try:
             if len(sfd_values) >= 2:
                 # The first value is the shear strictly at the left support (x=0)
-                # The second-to-last value is the shear at the right support (x=L) 
-                # (since the very last value at index -1 was padded with 0.0)
+                # The final nodal shear value corresponds to the right support (x=L).
                 self._current_max_dict["R_A"] = float(abs(sfd_values[0]))
-                self._current_max_dict["R_B"] = float(abs(sfd_values[-2]))
+                self._current_max_dict["R_B"] = float(abs(sfd_values[-1]))
         except Exception:
             pass
 
