@@ -722,7 +722,7 @@ class AdditionalInputs(QDialog):
 
         # Refresh crash barrier for correct compute value
         cb_type = self.findChild(QComboBox, KEY_CB_TYPE)
-        if cb_type:
+        if cb_type and cb_type.currentText().strip() != "Custom":
             # To fix some issue of not updating first time
             cur = cb_type.currentText()
             cb_type.setCurrentText("IRC 5 - High Containment RCC Crash Barrier")
@@ -747,7 +747,7 @@ class AdditionalInputs(QDialog):
 
         # Refresh wearing course for correct compute value
         wc_mat = self.findChild(QComboBox, KEY_WC_MATERIAL)
-        if wc_mat:
+        if wc_mat and wc_mat.currentText().strip() != "Custom":
             cur = wc_mat.currentText()
             other = "Bituminous" if cur != "Bituminous" else "Concrete"
             wc_mat.setCurrentText(other)
