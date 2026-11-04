@@ -221,6 +221,19 @@ class AdditionalInputs(QDialog):
                 w.installEventFilter(self)
             else:
                 w.removeEventFilter(self)
+        if not lock:
+            self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE))
+
+    def on_analysis_engine_changed(self, engine: str) -> None:  # on_change: sets and locks the Live Load boxes setu requires or cannot analyse; ospgrillage frees them
+        is_setu = engine == ENGINE_SETU
+        for keys, checked in ((SETU_REQUIRED_VEHICLES, True), (SETU_UNSUPPORTED_VEHICLES, False)):
+            for key in keys:
+                box = self.findChild(QCheckBox, key)
+                if is_setu:
+                    self.working_input_dict[key] = checked
+                    if box:
+                        box.setChecked(checked)
+                self._set_enabled(box, not is_setu)
 
     def _set_enabled(self, widget, enabled: bool):  # setEnabled wrapper used by mode/customize handlers — never re-enables a widget while the dialog is locked
         if widget:
@@ -252,6 +265,7 @@ class AdditionalInputs(QDialog):
             self.initial_default_dict = deepcopy(input_dict)
 
         self.set_defaults()
+        self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE, ENGINE_SETU))
 
         # clear() + update() keeps the same dict object (shared with template_page)
         # and drops keys removed from working_input_dict, e.g. stale .G{n} keys
@@ -552,6 +566,8 @@ class AdditionalInputs(QDialog):
                     widget.update(value)
 
             self.working_input_dict[key] = value
+
+        self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE))
 
     def showEvent(self, event):  # Qt event: refreshes active sub-tabs when dialog is shown or reopened
         super().showEvent(event)
