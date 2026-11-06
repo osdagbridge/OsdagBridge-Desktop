@@ -177,7 +177,7 @@ class BridgeDualCADWidget(QWidget):
         
         # Map number of girders
         if KEY_TS_NO_OF_GIRDERS in input_dict:
-            if input_dict[KEY_TS_NO_OF_GIRDERS] is not None:
+            if input_dict[KEY_TS_NO_OF_GIRDERS] not in (None, ""):
                 params['num_girders'] = int(input_dict[KEY_TS_NO_OF_GIRDERS])
             else:
                 params['num_girders'] = 4 # Add default values if not present

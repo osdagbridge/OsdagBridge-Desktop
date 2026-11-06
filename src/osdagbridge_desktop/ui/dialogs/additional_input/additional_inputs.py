@@ -317,6 +317,37 @@ class AdditionalInputs(QDialog):
             mode = str(self.working_input_dict.get(ctrl_id) or "")
             adaptive.switch_mode(mode)
 
+        # ── Refresh dynamic member and pair views ─────────────────────────────
+        gi_combo = self.findChild(QComboBox, KEY_MP_GD_SELECT_GIRDER)
+        if gi_combo:
+            self._on_girder_count_refreshed(KEY_TS_NO_OF_GIRDERS, gi_combo)
+            seg_table = self.findChild(QWidget, KEY_MP_GD_SEGMENT_TABLE)
+            if seg_table:
+                self._on_girder_segments_load(KEY_MP_GD_SELECT_GIRDER, seg_table)
+            member_combo = self.findChild(QComboBox, KEY_MP_GD_MEMBER_ID)
+            if member_combo:
+                self._on_segment_members_refreshed(KEY_MP_GD_SEGMENT_TABLE, member_combo)
+
+        gi, mi = self._get_current_girder_member_indices()
+        self._load_member_fields(gi, mi)
+        self._update_section_drawing()
+
+        cb_combo = self.findChild(QComboBox, KEY_MP_CB_SELECT_GIRDERS)
+        if cb_combo:
+            self._on_cb_girder_count_refreshed(KEY_TS_NO_OF_GIRDERS, cb_combo)
+            self._load_cb_pair(cb_combo.currentText().strip())
+
+        ed_combo = self.findChild(QComboBox, KEY_MP_ED_SELECT_GIRDERS)
+        if ed_combo:
+            self._on_ed_girder_count_refreshed(KEY_TS_NO_OF_GIRDERS, ed_combo)
+            self._load_ed_pair(ed_combo.currentText().strip())
+
+        stiff_combo = self.findChild(QComboBox, KEY_MP_STIFFENER_SELECT_MEMBER_ID)
+        if stiff_combo:
+            self._on_stiffener_member_ids_refreshed(KEY_MP_GD_SELECT_GIRDER, stiff_combo)
+            if stiff_combo.currentText().strip():
+                self._load_stiffener_member_data(stiff_combo.currentText().strip())
+
     def design_mode_trigger(self, mode_str: str):  # lifecycle: syncs Optimized/Custom mode across all affected widgets and AdaptiveWidgets
         # Ensures IS Section hidden and welded fields shown correctly on first open
         gd_type_w = self.findChild(QComboBox, KEY_MP_GIRDER_TYPE)
@@ -545,6 +576,9 @@ class AdditionalInputs(QDialog):
         # _save_stiffener_member_data otherwise only runs when switching *away* from a
         # member (via _on_stiffener_member_load), so the last-viewed girder (e.g. G4)
         # would never be persisted. This gives it the same save the other girders get.
+        self._save_member_fields()
+        self._save_cb_pair()
+        self._save_ed_pair()
         combo = self.findChild(QComboBox, KEY_MP_STIFFENER_SELECT_MEMBER_ID)
         if combo and combo.currentText().strip():
             self._save_stiffener_member_data(combo.currentText().strip())
@@ -1479,8 +1513,8 @@ class AdditionalInputs(QDialog):
     def _get_current_girder_member_indices(self) -> tuple[int, int]:  # utility: returns (girder_index, member_index) 1-based from current combo selections
         girder_combo = self.findChild(QComboBox, KEY_MP_GD_SELECT_GIRDER)
         member_combo = self.findChild(QComboBox, KEY_MP_GD_MEMBER_ID)
-        gi = (girder_combo.currentIndex() + 1) if girder_combo else 1
-        mi = (member_combo.currentIndex() + 1) if member_combo else 1
+        gi = max(1, girder_combo.currentIndex() + 1) if girder_combo and girder_combo.currentIndex() >= 0 else 1
+        mi = max(1, member_combo.currentIndex() + 1) if member_combo and member_combo.currentIndex() >= 0 else 1
         return gi, mi
 
     def _save_member_fields(self) -> None:  # utility: serialises all Girder Details widget values into working_input_dict under G{i}.M{j} keys
@@ -2158,6 +2192,11 @@ class AdditionalInputs(QDialog):
                 w.blockSignals(True)
                 w.setText(str(stored))
                 w.blockSignals(False)
+
+        inter_val = self.working_input_dict.get(f"{KEY_MP_STIFFENER_INTERMEDIATE}{suffix}", "Yes")
+        self._on_intermediate_stiffener_changed(inter_val, restore_default=False)
+        long_val = self.working_input_dict.get(f"{KEY_MP_STIFFENER_LONGITUDINAL}{suffix}", "No")
+        self._on_longitudinal_stiffener_changed(long_val)
 
     def _update_stiffener_cad(self) -> None:  # compute: pushes current working_input_dict and active member ID to the Stiffener Details CAD widget
         from osdagbridge_desktop.ui.dialogs.additional_input.drawings.stiffener_details_cad import StiffenerDetailsCad
@@ -3084,7 +3123,7 @@ class AdditionalInputs(QDialog):
         
         # Fallback to get data from Project Location
         if not zone:
-            zone = working_input_dict.get("project.location", {}).get("weather_data", {}).get("zone", "")
+            zone = (working_input_dict.get("project.location") or {}).get("weather_data", {}).get("zone", "")
 
         if not zone:
             return {}
