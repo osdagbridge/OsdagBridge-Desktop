@@ -16,6 +16,7 @@ from osdagbridge_core.reports.report_generator import (
 from osdagbridge_desktop.ui.utils.custom_titlebar import CustomTitleBar
 from osdagbridge_desktop.ui.dialogs.custom_messagebox import CustomMessageBox, MessageBoxType
 from osdagbridge_desktop.ui.utils.custom_cursors import pointing_hand_cursor
+from osdagbridge_desktop.ui.utils.theme_manager import apply_theme_to_dialog
 
 class ReportOptionsDialog(QDialog):
     """Design Report options dialog — Page 1 collects project metadata

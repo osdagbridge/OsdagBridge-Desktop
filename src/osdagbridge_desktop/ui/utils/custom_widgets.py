@@ -364,10 +364,8 @@ class CustomRadioButton(QRadioButton):
         return "<" in self._rich_text and ">" in self._rich_text
  
     def _doc(self) -> QTextDocument:
-        from PySide6.QtWidgets import QApplication
-        app = QApplication.instance()
-        theme = getattr(app, "theme", "light") if app else "light"
-        text_color = "#FFFFFF" if theme == "dark" else "#1a1a1a"
+        from osdagbridge_desktop.ui.utils.theme_manager import get_current_theme
+        text_color = "#FFFFFF" if get_current_theme() == "dark" else "#1a1a1a"
 
         doc = QTextDocument()
         doc.setDefaultFont(self.font())
@@ -377,10 +375,8 @@ class CustomRadioButton(QRadioButton):
     # ── Paint ────────────────────────────────────────────────────────────────
  
     def paintEvent(self, event):
-        from PySide6.QtWidgets import QApplication
-        app = QApplication.instance()
-        theme = getattr(app, "theme", "light") if app else "light"
-        is_dark = (theme == "dark")
+        from osdagbridge_desktop.ui.utils.theme_manager import get_current_theme
+        is_dark = (get_current_theme() == "dark")
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
