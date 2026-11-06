@@ -74,7 +74,6 @@ _ensure_std_streams()
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QFile, QTextStream
 from osdagbridge_desktop.resources import resources_rc
 
 
@@ -262,24 +261,28 @@ ensure_osdag_core_db()
 # Import template_page
 from osdagbridge_desktop.ui.template_page import CustomWindow
 from osdagbridge_core.bridge_types.plate_girder.plategirderbridge import PlateGirderBridge
+from osdagbridge_desktop.ui.utils.theme_manager import load_stylesheet
 
-def load_stylesheet():
-    """Load the global QSS stylesheet from resources."""
-    file = QFile(":/themes/lightstyle.qss")
-    if file.open(QFile.ReadOnly | QFile.Text):
-        stream = QTextStream(file)
-        stylesheet = stream.readAll()
-        file.close()
-        return stylesheet
-    return ""
+def _qt_message_handler(mode, context, message):
+    """Filter out non-fatal platform warnings, such as DWM dark border errors on custom/frameless windows."""
+    if "setDarkBorderToWindow" in message:
+        return
+    # Forward all other messages to standard stderr formatting
+    import sys
+    sys.stderr.write(f"{message}\n")
 
 def main():
+    # Install Qt message handler to filter platform-level window border warnings
+    from PySide6.QtCore import qInstallMessageHandler
+    qInstallMessageHandler(_qt_message_handler)
+
     # Establish the Windows taskbar identity before the QApplication so the
     # taskbar uses our icon, not the host Python interpreter's.
     _set_windows_app_id()
 
     # Create the Qt application instance
     app = QApplication(sys.argv)
+    app.theme = "light"
 
     # Application-wide icon: taskbar, Alt-Tab, and default window icon.
     icon = _app_icon()
