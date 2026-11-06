@@ -891,6 +891,20 @@ class AdditionalInputs(QDialog):
         scan = text[1:] if text[:1] in "+-" else text
         if text and not (scan.isdigit() or (scan.count(".") == 1 and scan.replace(".", "").isdigit())):
             return
+
+        # Dynamic keys already match the girder count: skip, or the saved layout
+        # and member properties get reset (this also runs on every dialog open)
+        import re
+        count = int(float(str(self.working_input_dict.get(KEY_TS_NO_OF_GIRDERS) or 0)))
+        max_girder = max(
+            (int(g) for k in self.working_input_dict
+             if k.startswith("member_properties.girder_details.") and ".G" in k
+             for g in re.findall(r'G(\d+)', k)),
+            default=0,
+        )
+        if max_girder == count:
+            return
+
         if self.update_girder_layout("girders"):
             from osdagbridge_core.bridge_types.plate_girder.defaults import _on_no_of_girders_changed
             _on_no_of_girders_changed(self.working_input_dict)
