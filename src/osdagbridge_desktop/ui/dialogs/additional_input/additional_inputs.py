@@ -730,7 +730,7 @@ class AdditionalInputs(QDialog):
 
         # Refresh median for correct compute value (skipped when no median is included)
         md_type = self.findChild(QComboBox, KEY_MD_TYPE)
-        if md_type and str(self.working_input_dict.get(KEY_INCLUDE_MEDIAN)).strip().lower() == "yes":
+        if md_type and md_type.currentText().strip() != "Custom" and str(self.working_input_dict.get(KEY_INCLUDE_MEDIAN)).strip().lower() == "yes":
             cur = md_type.currentText()
             md_type.setCurrentText("IRC 5 - Raised Kerb")
             md_type.setCurrentText(cur)
