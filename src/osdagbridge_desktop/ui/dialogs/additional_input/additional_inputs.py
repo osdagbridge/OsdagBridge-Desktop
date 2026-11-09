@@ -241,6 +241,9 @@ class AdditionalInputs(QDialog):
 
         self.set_defaults()
 
+        # clear() + update() keeps the same dict object (shared with template_page)
+        # and drops keys removed from working_input_dict, e.g. stale .G{n} keys
+        self.default_input_dict.clear()
         self.default_input_dict.update(self.working_input_dict)
 
         self._last_good_layout = {
@@ -549,6 +552,8 @@ class AdditionalInputs(QDialog):
         if combo and combo.currentText().strip():
             self._save_stiffener_member_data(combo.currentText().strip())
 
+        # clear() + update() so keys removed from working_input_dict (stale .G{n}) are dropped too
+        self.default_input_dict.clear()
         self.default_input_dict.update(self.working_input_dict)
         
         # Purge stale keys natively on the main dictionary using our robust extend_cb function
