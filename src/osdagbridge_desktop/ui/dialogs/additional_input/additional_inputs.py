@@ -1664,6 +1664,14 @@ class AdditionalInputs(QDialog):
             new_key = k.replace(f".G{source_g}.", f".G{target_g}.")
             self.working_input_dict[new_key] = copy.deepcopy(self.working_input_dict[k])
 
+    def _on_apply_all_clicked(self) -> None:  # on_change: applies current girder settings to all other girders
+        gi, _ = self._get_current_girder_member_indices()
+        count = int(float(str(self.working_input_dict.get(KEY_TS_NO_OF_GIRDERS, 1))))
+        targets = set(range(1, count + 1)) - {gi}
+        for target_g in targets:
+            self._copy_girder_properties(gi, target_g)
+        print(f"@@: Applied Girder {gi} settings to all girders: {targets}")
+
     def _on_apply_exterior_clicked(self) -> None:  # on_change: applies current girder settings to first and last girders
         gi, _ = self._get_current_girder_member_indices()
         count = int(float(str(self.working_input_dict.get(KEY_TS_NO_OF_GIRDERS, 1))))
