@@ -506,6 +506,11 @@ class UIBuilder(QWidget):
                             background-color: #ebebeb;
                         }
                     """)
+                    ai = self.additional_input_instance
+                    if ai and cb_id:
+                        cb.stateChanged.connect(
+                            lambda state, k=cb_id: ai._on_field_edited(k, bool(state))
+                        )
                     vbox.addWidget(cb)
                     checkboxes.append(cb)
                 vbox.addStretch()
