@@ -1279,9 +1279,16 @@ class AdditionalInputs(QDialog):
 
         widget_id = target_widget.objectName()
         if widget_id == KEY_MP_GD_APPLY_EXTERIOR:
-            target_widget.setVisible(is_exterior)
+            visible = is_exterior
         elif widget_id == KEY_MP_GD_APPLY_INTERIOR:
-            target_widget.setVisible(not is_exterior)
+            visible = not is_exterior
+        else:
+            return
+        target_widget.setVisible(visible)
+        # Hide the empty grid label too, so the hidden button's row collapses
+        lbl = self.findChild(QLabel, widget_id + "_label")
+        if lbl:
+            lbl.setVisible(visible)
 
     def _on_girder_count_refreshed(self, origin_key: str, current_object: QComboBox) -> None:  # END_CONNECTOR: repopulates Select Girder combo when girder count changes
         value = self.working_input_dict.get(origin_key)
