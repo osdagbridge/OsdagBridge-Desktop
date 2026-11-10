@@ -552,7 +552,7 @@ def resolve_permanent_load_summary(output_dict: dict) -> dict | None:
     """
     Permanent (dead) load breakdown per girder (kN/m). All values are computed at
     design time and read straight from
-    output_dict. SW and DL vary per girder; SW-factor / DC / DD / DW / SIDL are
+    output_dict. SW / DD / DW / SIDL / DL vary per girder; SW-factor and DC are
     shared. DL = SW + DC + DD + DW + SIDL.
     """
     od = output_dict
@@ -566,9 +566,6 @@ def resolve_permanent_load_summary(output_dict: dict) -> dict | None:
 
     sw_factor = od.get(KEY_PL_SELF_WEIGHT_FACTOR)
     dc   = od.get(KEY_SD_DL_DC)
-    dd   = od.get(KEY_SD_DL_DD)
-    dw   = od.get(KEY_SD_DL_DW)
-    sidl = od.get(KEY_SD_DL_SIDL)
 
     rows = []
     for i in range(1, n + 1):
@@ -577,9 +574,9 @@ def resolve_permanent_load_summary(output_dict: dict) -> dict | None:
             _num(sw_factor),
             _num(od.get(f"{KEY_SD_DL_SW}.G{i}"), 3),
             _num(dc, 3),
-            _num(dd, 3),
-            _num(dw, 3),
-            _num(sidl, 3),
+            _num(od.get(f"{KEY_SD_DL_DD}.G{i}"), 3),
+            _num(od.get(f"{KEY_SD_DL_DW}.G{i}"), 3),
+            _num(od.get(f"{KEY_SD_DL_SIDL}.G{i}"), 3),
             _num(od.get(f"{KEY_SD_PERMANENT_DL}.G{i}"), 3),
         ])
 
