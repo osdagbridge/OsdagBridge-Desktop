@@ -732,6 +732,11 @@ class MplPlotWidget(QWidget):
 
         loadcase = str(loadcase or "").strip()
 
+        # Special Vehicle cases ("SV +300", "SV-L -300 | R: 2xClassA") are
+        # individual load cases; the "+" there is the ±300 mm offset.
+        if loadcase.lower().startswith(("sv ", "sv-")):
+            return True
+
         # Do not display nodal-load arrows for load combinations.
         if "+" in loadcase:
             return False

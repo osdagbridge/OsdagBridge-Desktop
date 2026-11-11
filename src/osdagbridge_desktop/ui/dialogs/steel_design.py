@@ -872,6 +872,9 @@ class SteelDesign(QDialog):
 
         dead_lcs     = _strip_moving(classified.get("dead", []))
         static_lcs   = _strip_moving(classified.get("vehicle_static", []))
+        # Special Vehicle cases ("SV +300", "SV-L +300 | R: ...") — own bucket,
+        # present only when Class SV is ticked in Additional Inputs.
+        sv_lcs       = _strip_moving(classified.get("sv", []))
         dl_ll_lcs    = _strip_moving(classified.get("dl_ll", []))
         uls_lcs      = _strip_moving(classified.get("uls_basic", [])
                         + classified.get("uls_accidental", [])
@@ -905,6 +908,7 @@ class SteelDesign(QDialog):
 
         _add_group("Dead Loads",          dead_lcs)
         _add_group("Vehicle Loads",       static_lcs)
+        _add_group("Special Vehicle",     sv_lcs)
         _add_group("Total Load (DL+LL)",  dl_ll_lcs)
         _add_group("ULS Combinations",    uls_lcs)
         _add_group("SLS Combinations",    sls_lcs)
