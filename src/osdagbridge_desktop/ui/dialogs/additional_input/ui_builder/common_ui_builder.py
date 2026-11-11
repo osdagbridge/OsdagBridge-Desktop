@@ -497,6 +497,11 @@ class UIBuilder(QWidget):
                     cb.setChecked(default_checked)
                     if cb_id:
                         cb.setObjectName(cb_id)
+                        # Without this the toggle never reaches working_input_dict, so Save drops it.
+                        if self.additional_input_instance:
+                            cb.stateChanged.connect(
+                                lambda state, k=cb_id: self.additional_input_instance._on_field_edited(k, bool(state))
+                            )
                     cb.setStyleSheet("""
                         QCheckBox { font-size: 11px; color: #333; spacing: 6px; }
                         QCheckBox:disabled { font-size: 11px; color: #aaaaaa; spacing: 6px; }
