@@ -993,6 +993,12 @@ class SteelDesign(QDialog):
             return
 
         xs, bmd_values, sfd_values, defl_values, all_data = result
+        # Extract actual support reactions for the selected girder and load case.
+        _reactions = None
+        try:
+            _reactions = engine.extract_reactions(loadcase, member_key)
+        except Exception:
+            pass
         # Flip the sign of deflection so downward (currently +ve) renders as -ve
         # across the deflection plot, the scroll cursor, and the max-value panel.
         defl_values = -np.asarray(defl_values)
@@ -1007,15 +1013,13 @@ class SteelDesign(QDialog):
             xs, bmd_values, sfd_values, all_data
         )
 
-        # ── Append support reactions to dict ──────────────────────────────────
-        try:
-            if len(sfd_values) >= 2:
-                # The first value is the shear strictly at the left support (x=0)
-                # The final nodal shear value corresponds to the right support (x=L).
-                self._current_max_dict["R_A"] = float(abs(sfd_values[0]))
-                self._current_max_dict["R_B"] = float(abs(sfd_values[-1]))
-        except Exception:
-            pass
+        # Append independently extracted support reactions.
+        self._current_max_dict["R_A"] = (
+            _reactions.get("Ra") if isinstance(_reactions, dict) else None
+        )
+        self._current_max_dict["R_B"] = (
+            _reactions.get("Rb") if isinstance(_reactions, dict) else None
+        )
 
         # ── Update RHS field labels to match the active component ─────────────
         # Rebuild x_fields mapping so that _update_right_panel_for_mode uses
@@ -1039,13 +1043,6 @@ class SteelDesign(QDialog):
         self._current_max_keys = max_keys
 
         engine.clear_axes(self.canvas)
-
-        # ── Gather reactions for scheme label overlay ─────────────────────────────
-        _reactions = None
-        try:
-            _reactions = engine.extract_reactions(loadcase, member_key)
-        except Exception:
-            pass  # Non-fatal: scheme renders without reaction labels
 
         # ── Gather load descriptors for scheme load overlay ───────────────────────
         _loads = None
@@ -1089,7 +1086,11 @@ class SteelDesign(QDialog):
         for dict_key, field_key, fmt in mapping:
             if field_key in self.analysis_tab.result_fields:
                 val = max_dict.get(dict_key, 0.0)
-                self.analysis_tab.result_fields[field_key].setText(fmt.format(val))
+
+                if dict_key in ("R_A", "R_B") and val is None:
+                    self.analysis_tab.result_fields[field_key].setText("N/A")
+                else:
+                    self.analysis_tab.result_fields[field_key].setText(fmt.format(val))
 
     def _update_right_panel_for_mode(self):
         """
