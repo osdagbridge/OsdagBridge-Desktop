@@ -89,6 +89,28 @@ from osdagbridge_core.utils.common import (
     KEY_END_DIAPHRAGM,
     KEY_TD_CB_SECTION_INPUTS_MATERIAL_GRADE,
     KEY_TD_ED_SECTION_INPUTS_MATERIAL_GRADE,
+    ED_TYPE_CROSS_BRACING,
+    ED_TYPE_ROLLED_BEAM,
+    ED_TYPE_WELDED_BEAM,
+    ED_GROUP_CROSS_BRACING,
+    ED_GROUP_ROLLED_BEAM,
+    ED_GROUP_WELDED_BEAM,
+    KEY_MP_ED_IS_SECTION,
+    KEY_TD_ED_PROP_L,
+    KEY_TD_ED_PROP_H,
+    KEY_TD_ED_PROP_B,
+    KEY_TD_ED_PROP_TW,
+    KEY_TD_ED_PROP_TF,
+    KEY_TD_ED_PROP_RZ,
+    KEY_TD_ED_PROP_M,
+    KEY_TD_ED_PROP_A,
+    KEY_TD_ED_PROP_IZ,
+    KEY_TD_ED_PROP_IV,
+    KEY_TD_ED_PROP_RV,
+    KEY_TD_ED_PROP_ZZ,
+    KEY_TD_ED_PROP_ZV,
+    KEY_TD_ED_PROP_ZUZ,
+    KEY_TD_ED_PROP_ZUV,
 )
 
 # ── Style constants ───────────────────────────────────────────────────────────
@@ -224,7 +246,11 @@ class TransverseMemberDesign(QDialog):
         self._designs_dict:     dict          = {}
         self._pair_keys:        list[str]     = []
         self._members_per_pair: dict[str, int] = {}
-        self._ed_group_widgets: dict[str, list[QWidget]] = {"crossbracing": [], "welded_beam": []}
+        self._ed_group_widgets: dict[str, list[QWidget]] = {
+            ED_GROUP_CROSS_BRACING: [],
+            ED_GROUP_ROLLED_BEAM: [],
+            ED_GROUP_WELDED_BEAM: [],
+        }
         self._backend: object = None
         self._cb_forces_df = None   # full compute_panel_forces() DataFrame for per-LC queries
 
@@ -441,6 +467,9 @@ class TransverseMemberDesign(QDialog):
         self._ed_cards_cb = self._build_section_cards_panel(schema.get("right_panel", {}), key_prefix="ed_")
         stack_layout.addWidget(self._ed_cards_cb)
 
+        self._ed_cards_rb = self._build_rolled_beam_card()
+        stack_layout.addWidget(self._ed_cards_rb)
+
         self._ed_cards_wb = self._build_welded_beam_card()
         stack_layout.addWidget(self._ed_cards_wb)
 
@@ -456,8 +485,8 @@ class TransverseMemberDesign(QDialog):
         scroll.setWidget(content)
         outer.addWidget(scroll)
 
-        # Set initial state — crossbracing visible, welded beam hidden
-        self._on_ed_type_changed("Cross Bracing")
+        # Set initial state — crossbracing visible, rolled/welded beam hidden
+        self._on_ed_type_changed(ED_TYPE_CROSS_BRACING)
         return tab
 
     # Left panel
@@ -605,6 +634,64 @@ class TransverseMemberDesign(QDialog):
         if fid:
             self._widgets[fid] = box
         return box
+
+    def _build_rolled_beam_card(self) -> QFrame:
+        """Single full-width card shown when ED type is Rolled Beam."""
+        card = self._inner_box()
+        card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        outer = QHBoxLayout(card)
+        outer.setContentsMargins(10, 8, 10, 8)
+        outer.setSpacing(16)
+
+        # Left: section preview
+        lbl = QLabel("End Diaphragm")
+        lbl.setStyleSheet(_HEADING_STYLE)
+        preview = PlaceholderSectionPreviewWidget(placeholder_text="Rolled Beam", min_height=150)
+        preview.setFixedWidth(160)
+        self._section_previews["ED Rolled Beam"] = preview
+        left_v = QVBoxLayout()
+        left_v.setContentsMargins(0, 0, 0, 0)
+        left_v.setSpacing(4)
+        left_v.addWidget(lbl)
+        left_v.addWidget(preview)
+        left_v.addStretch()
+        outer.addLayout(left_v)
+
+        # Right: property columns
+        col1 = ["L (m)", "H (m)", "B (m)", "tw (m)", "tF (m)"]
+        col2 = ["M (Kg/m)", "A (cm²)", "Iz (cm⁴)", "Iv (cm⁴)", "rz (cm)"]
+        col3 = ["rv (cm)", "Zz (cm³)", "Zv (cm³)", "Zuz (cm³)", "Zuv (cm³)"]
+
+        props_layout = QHBoxLayout()
+        props_layout.setContentsMargins(0, 0, 0, 0)
+        props_layout.setSpacing(10)
+        fields: dict[str, QLineEdit] = {}
+
+        for col_props in [col1, col2, col3]:
+            col = QGridLayout()
+            col.setContentsMargins(0, 0, 0, 0)
+            col.setHorizontalSpacing(4)
+            col.setVerticalSpacing(3)
+            for r, prop in enumerate(col_props):
+                lbl_p = QLabel(prop)
+                lbl_p.setStyleSheet(_PROP_LBL_STYLE)
+                field = QLineEdit()
+                field.setReadOnly(True)
+                field.setFixedWidth(68)
+                field.setFixedHeight(21)
+                field.setStyleSheet(
+                    "QLineEdit { border:1px solid #d0d0d0; border-radius:3px;"
+                    " background:#fafafa; font-size:10px; color:#333; padding:1px 4px; }"
+                )
+                col.addWidget(lbl_p, r, 0, Qt.AlignLeft | Qt.AlignVCenter)
+                col.addWidget(field, r, 1, Qt.AlignLeft | Qt.AlignVCenter)
+                fields[prop] = field
+            props_layout.addLayout(col)
+
+        self._prop_fields["ED Rolled Beam"] = fields
+        outer.addLayout(props_layout)
+        outer.addStretch()
+        return card
     
     def _build_welded_beam_card(self) -> QFrame:
         """Single full-width card shown when ED type is Welded Beam."""
@@ -1216,7 +1303,44 @@ class TransverseMemberDesign(QDialog):
         if type_w:
             type_w.setText(ed_type)
 
-        if ed_type == "Welded Beam":
+        if ed_type == ED_TYPE_ROLLED_BEAM:
+            if not pair_designs:
+                return
+            is_sec = od.get(f"{KEY_MP_ED_IS_SECTION}.{pair_id}")
+            w = self._widgets.get(KEY_TD_ED_SECTION_INPUTS_IS_SECTION)
+            if w:
+                w.setText(str(is_sec) if is_sec else "")
+
+            rb_props = {
+                "L (m)":      od.get(f"{KEY_TD_ED_PROP_L}.{pair_id}"),
+                "H (m)":      od.get(f"{KEY_TD_ED_PROP_H}.{pair_id}"),
+                "B (m)":      od.get(f"{KEY_TD_ED_PROP_B}.{pair_id}"),
+                "tw (m)":     od.get(f"{KEY_TD_ED_PROP_TW}.{pair_id}"),
+                "tF (m)":     od.get(f"{KEY_TD_ED_PROP_TF}.{pair_id}"),
+                "rz (cm)":    od.get(f"{KEY_TD_ED_PROP_RZ}.{pair_id}"),
+                "M (Kg/m)":   od.get(f"{KEY_TD_ED_PROP_M}.{pair_id}"),
+                "A (cm²)":    od.get(f"{KEY_TD_ED_PROP_A}.{pair_id}"),
+                "Iz (cm⁴)":   od.get(f"{KEY_TD_ED_PROP_IZ}.{pair_id}"),
+                "Iv (cm⁴)":   od.get(f"{KEY_TD_ED_PROP_IV}.{pair_id}"),
+                "rv (cm)":    od.get(f"{KEY_TD_ED_PROP_RV}.{pair_id}"),
+                "Zz (cm³)":   od.get(f"{KEY_TD_ED_PROP_ZZ}.{pair_id}"),
+                "Zv (cm³)":   od.get(f"{KEY_TD_ED_PROP_ZV}.{pair_id}"),
+                "Zuz (cm³)":  od.get(f"{KEY_TD_ED_PROP_ZUZ}.{pair_id}"),
+                "Zuv (cm³)":  od.get(f"{KEY_TD_ED_PROP_ZUV}.{pair_id}"),
+            }
+            fields = self._prop_fields.get("ED Rolled Beam", {})
+            for prop_lbl, field in fields.items():
+                val = rb_props.get(prop_lbl)
+                field.setText(f"{val:.4g}" if isinstance(val, (int, float)) else str(val if val is not None else ""))
+
+            preview = self._section_previews.get("ED Rolled Beam")
+            if preview is not None:
+                if is_sec:
+                    preview.set_section("beam", str(is_sec))
+                else:
+                    preview.clear()
+
+        elif ed_type == ED_TYPE_WELDED_BEAM:
             if not pair_designs:
                 return
             wb = self._member_designs(pair_designs, "welded_beam", True)
@@ -1598,14 +1722,14 @@ class TransverseMemberDesign(QDialog):
         pairs        = forces_dict.get("pairs", {})
         vals         = pairs.get(pair_key, {})
         pair_designs = designs_dict.get(pair_key, {})
-        n_members    = 2  # One end diaphragm at each end of the span
-        ed_type      = pair_designs.get("ed_type", "Cross Bracing")
-        pair_num     = (self._pair_keys.index(pair_key) + 1) if pair_key in self._pair_keys else 1
+        od = getattr(self._backend, "output_dict", {}) or {}
+        _pid = pair_key.replace("-", "")
+        ed_type = pair_designs.get("ed_type") or od.get(f"{KEY_MP_ED_TYPE}.{_pid}") or ED_TYPE_CROSS_BRACING
+        pair_num = (self._pair_keys.index(pair_key) + 1) if pair_key in self._pair_keys else 1
+        n_members = 2  # One end diaphragm at each end of the span
 
         # A failed Osdag design reports no section, so fall back to the section
         # the user selected for this pair (per-member ED input keys).
-        od = getattr(self._backend, "output_dict", {}) or {}
-        _pid = pair_key.replace("-", "")
         _m = re.match(r"G(\d+)G", _pid)
         _sfx = f".{_pid}.E{_m.group(1)}M1" if _m else ""
         _tc_in = str(od.get(f"{KEY_MP_ED_TOP_CHORD_SECTION_DESIG}{_sfx}") or "")
@@ -1629,7 +1753,43 @@ class TransverseMemberDesign(QDialog):
         for m_idx in range(n_members):
             member_id = f"E{pair_num}M{m_idx + 1}"   # → E1M1, E1M2 / E2M1, E2M2
 
-            if ed_type == "Welded Beam":
+            if ed_type == ED_TYPE_ROLLED_BEAM:
+                member_data = self._member_designs(pair_designs, "rolled_beam", True)
+                res = _extract_osdag_summary(member_data) if member_data else {}
+                is_sec = res.get("section") or od.get(f"{KEY_MP_ED_IS_SECTION}.{_pid}") or "—"
+                conn = "N/A"
+
+                if member_data and ("Optimum.UR" in member_data or "Moment.Strength" in member_data or res.get("design_status") is not None):
+                    eff = res.get("efficiency")
+                    cap_m = res.get("moment_capacity_kNm")
+                    slnd = res.get("slenderness") if res.get("slenderness") is not None else res.get("esr")
+
+                    eff_str  = f"{eff:.3f}" if eff is not None else "—"
+                    cap_str  = f"{cap_m:.2f}" if cap_m is not None else "—"
+                    slnd_str = f"{slnd:.1f}" if slnd is not None else "—"
+
+                    m_knm = vals.get("ed_moment_kNm")
+                    if m_knm is None:
+                        ed_f = od.get("end_diaphragm_forces_dict", {}).get("pairs", {}).get(pair_key, {})
+                        m_knm = ed_f.get("ed_moment_kNm")
+                    force_str = f"{m_knm:.2f}" if m_knm is not None else "—"
+
+                    status_color, status = self._design_status(res)
+                    rows_html.append(
+                        f"<tr><td>{member_id}</td><td>Flexure (Bending)</td>"
+                        f"<td>{force_str}</td><td>{is_sec}</td><td>{conn}</td>"
+                        f"<td>{slnd_str}</td><td>{cap_str}</td><td>{eff_str}</td>"
+                        f"<td style='color:{status_color};font-weight:bold;'>{status}</td></tr>"
+                    )
+                else:
+                    rows_html.append(
+                        f"<tr><td>{member_id}</td><td>Rolled Beam</td>"
+                        f"<td>—</td><td>{is_sec}</td><td>{conn}</td>"
+                        f"<td>—</td><td>—</td><td>—</td>"
+                        f"<td style='color:#555;font-weight:bold;'>Section Lookup</td></tr>"
+                    )
+
+            elif ed_type == ED_TYPE_WELDED_BEAM:
                 member_data = self._member_designs(pair_designs, "welded_beam", True)
                 for force_type, force_key in (
                     ("Tension",     "ed_tension_kN"),
@@ -1711,20 +1871,25 @@ class TransverseMemberDesign(QDialog):
         )
     
     def _on_ed_type_changed(self, text: str) -> None:
-        is_welded = text == "Welded Beam"
+        is_rolled = text == ED_TYPE_ROLLED_BEAM
+        is_welded = text == ED_TYPE_WELDED_BEAM
+        is_cb = not (is_rolled or is_welded)
 
         # Show/hide left panel field rows
-        for wgt in self._ed_group_widgets.get("crossbracing", []):
-            wgt.setVisible(not is_welded)
-        for wgt in self._ed_group_widgets.get("welded_beam", []):
+        for wgt in self._ed_group_widgets.get(ED_GROUP_CROSS_BRACING, []):
+            wgt.setVisible(is_cb)
+        for wgt in self._ed_group_widgets.get(ED_GROUP_ROLLED_BEAM, []):
+            wgt.setVisible(is_rolled)
+        for wgt in self._ed_group_widgets.get(ED_GROUP_WELDED_BEAM, []):
             wgt.setVisible(is_welded)
 
         # Switch right panel cards
-        self._switch_ed_right_panel(is_welded)
+        self._switch_ed_right_panel(text)
     
-    def _switch_ed_right_panel(self, is_welded: bool) -> None:
-        self._ed_cards_cb.setVisible(not is_welded)
-        self._ed_cards_wb.setVisible(is_welded)
+    def _switch_ed_right_panel(self, text: str) -> None:
+        self._ed_cards_cb.setVisible(text not in (ED_TYPE_ROLLED_BEAM, ED_TYPE_WELDED_BEAM))
+        self._ed_cards_rb.setVisible(text == ED_TYPE_ROLLED_BEAM)
+        self._ed_cards_wb.setVisible(text == ED_TYPE_WELDED_BEAM)
 
     def _on_tab_changed(self, index: int):
         tab_key = "cb" if index == 0 else "ed"
