@@ -1,4 +1,5 @@
 import os, yaml
+from copy import deepcopy
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QMenuBar, QSplitter, QSizePolicy, QPushButton, QLineEdit, QComboBox, QFileDialog,
@@ -121,6 +122,10 @@ class CustomWindow(QWidget):
 
         # AdditionalInputs dialog 
         self._additional_inputs_dialog: AdditionalInputs | None = None
+
+        # Snapshot of input_dict right after solve_extend_basic_input_dict (i.e. when
+        # required fields changed). Used by the dialog's Defaults button.
+        self._ai_initial_defaults: dict | None = None
       
         # AdditionalInputs - Created once on first use, shown/hidden thereafter.
         self._get_additional_inputs()
@@ -476,7 +481,7 @@ class CustomWindow(QWidget):
                 pass
 
         # To Update the Input Dictionary before opening it
-        dlg.set_input_dictionary(self.input_dict)
+        dlg.set_input_dictionary(self.input_dict, initial_defaults=self._ai_initial_defaults)
 
         # Update Internal 2D CAD State
         # Single Source of Truth = _last_mapped_params dict in BridgeDualCADWidget
@@ -668,6 +673,7 @@ class CustomWindow(QWidget):
         # Solve bridge layout so the dict has computed values before Design or Additional Inputs
         if self.input_dock.is_require_field_changed:
             solve_extend_basic_input_dict(self.input_dict)
+            self._ai_initial_defaults = deepcopy(self.input_dict)
             self.input_dock.is_require_field_changed = False
 
         print("\n@@input_dictionary_after (common_design_func):\n")
@@ -917,6 +923,7 @@ class CustomWindow(QWidget):
         if self.input_dock.is_require_field_changed:
             try:
                 solve_extend_basic_input_dict(self.input_dict)
+                self._ai_initial_defaults = deepcopy(self.input_dict)
                 self.input_dock.is_require_field_changed = False
             except Exception:
                 # If solver fails mid-edit, keep raw values for best-effort redraw.

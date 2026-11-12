@@ -46,6 +46,9 @@ class AdditionalInputs(QDialog):
         # Just initializing for intial refernce
         # Input dictionary treated as defaults for current scenario
         self.default_input_dict = {}
+        # Initial defaults (input_dict right after solve_extend_basic_input_dict),
+        # restored by the Defaults button. Not the last saved values.
+        self.initial_default_dict = {}
         # Work temporarily on a copy of default dictionary
         self.working_input_dict = {}
         # Last confirmed-good spacing and girder count; restored if solver raises an error
@@ -163,9 +166,13 @@ class AdditionalInputs(QDialog):
         self.defaults_button.clicked.connect(lambda: pprint(self.working_input_dict))
 
         # # TEMP: prints working_input_dict without resetting anything — remove before merging.
-        # debug_print_button = QPushButton("Working Dict", action_bar)
-        # debug_print_button.clicked.connect(lambda: pprint(self.working_input_dict))
-        # action_bar.layout().insertWidget(action_bar.layout().count() - 1, debug_print_button)
+        # debug_print_button0 = QPushButton("Working Dict", action_bar)
+        # debug_print_button0.clicked.connect(lambda: pprint(self.working_input_dict))
+        # action_bar.layout().insertWidget(action_bar.layout().count() - 1, debug_print_button0)
+
+        # debug_print_button1 = QPushButton("Default Dict", action_bar)
+        # debug_print_button1.clicked.connect(lambda: pprint(self.initial_default_dict))
+        # action_bar.layout().insertWidget(action_bar.layout().count() - 1, debug_print_button1)
 
         self.save_button.clicked.connect(self._save_inputs)
         main_layout.addSpacing(6)
@@ -235,9 +242,14 @@ class AdditionalInputs(QDialog):
             return True
         return super().eventFilter(obj, event)
 
-    def set_input_dictionary(self, input_dict: dict):  # lifecycle: sets default/working dicts and wires END_CONNECTORS on first open
+    def set_input_dictionary(self, input_dict: dict, initial_defaults: dict | None = None):  # lifecycle: sets default/working dicts and wires END_CONNECTORS on first open
         self.default_input_dict = input_dict
         self.working_input_dict = deepcopy(input_dict)
+        if initial_defaults is not None:
+            self.initial_default_dict = deepcopy(initial_defaults)
+        elif not self.initial_default_dict:
+            # No snapshot yet: fall back to the current dict
+            self.initial_default_dict = deepcopy(input_dict)
 
         self.set_defaults()
 
@@ -463,21 +475,52 @@ class AdditionalInputs(QDialog):
         # Apply Tab Active/Deactive States-------------------------------------
         self.refresh_typical_section()
 
-    def reset_active_tab_defaults(self) -> None:  # lifecycle: resets current tab's fields to default_input_dict values
+    def reset_active_tab_defaults(self) -> None:  # lifecycle: resets current tab's fields to initial_default_dict values
         """
-        Reset only the currently active tab's fields to their default values
-        sourced from default_input_dict (populated from defaults.py at startup).
+        Reset only the currently active tab's fields to their initial default values
+        sourced from initial_default_dict (snapshot taken after solve_extend_basic_input_dict).
         Does NOT affect fields on other tabs.
         """
         active_tab = self.tabs.currentWidget()
         if active_tab is None:
             return
 
+        # Member Properties keys are dynamic: read <base_key> + suffix of the selected girder/member/pair
+        import re
+        from PySide6.QtWidgets import QTabWidget
+        sub_id, suffix = "", ""
+        if active_tab.findChild(QWidget, "member_properties.main"):
+            sub_tabs = active_tab.findChild(QTabWidget)
+            page = sub_tabs.currentWidget() if sub_tabs else None
+            sub_id = page.main_widget.objectName() if hasattr(page, "main_widget") else ""
+
+            def _selected(key):
+                w = self.findChild(QComboBox, key)
+                return w.currentText().strip() if w else ""
+
+            if sub_id == KEY_MP_GD_TAB:
+                gi, mi = self._get_current_girder_member_indices()
+                suffix = f".G{gi}.M{mi}"
+            elif sub_id == KEY_MP_SD_TAB:
+                m = re.match(r"G(\d+)M(\d+)", _selected(KEY_MP_STIFFENER_SELECT_MEMBER_ID))
+                suffix = f".G{m[1]}.M{m[2]}" if m else ""
+            elif sub_id == KEY_MP_CB_TAB:
+                m = re.match(r"G(\d+) to G(\d+)", _selected(KEY_MP_CB_SELECT_GIRDERS))
+                suffix = f".G{m[1]}G{m[2]}.B{m[1]}M1" if m else ""
+            elif sub_id == KEY_MP_ED_TAB:
+                m = re.match(r"G(\d+) to G(\d+)", _selected(KEY_MP_ED_SELECT_GIRDERS))
+                suffix = f".G{m[1]}G{m[2]}.E{m[1]}M1" if m else ""
+
         for widget in active_tab.findChildren(QWidget):
             name = widget.objectName()
-            if not name or name not in self.default_input_dict:
+            if not name:
                 continue
-            value = self.default_input_dict.get(name)
+            key = name
+            if suffix and name.startswith(sub_id) and name + suffix in self.initial_default_dict:
+                key = name + suffix
+            if key not in self.initial_default_dict:
+                continue
+            value = self.initial_default_dict.get(key)
             if value is None:
                 continue
 
@@ -492,28 +535,23 @@ class AdditionalInputs(QDialog):
                             text = f"{float(value):.2e}"
                 except (ValueError, TypeError):
                     text = str(value)
-                widget.blockSignals(True)
                 widget.setText(text)
-                widget.blockSignals(False)
+
+                # If the no. of girder is changed in default, update the connecting fields
+                if name == KEY_TS_NO_OF_GIRDERS:
+                    widget.editingFinished.emit()
 
             elif isinstance(widget, QComboBox):
-                widget.blockSignals(True)
                 widget.setCurrentText(str(value))
-                widget.blockSignals(False)
-                if hasattr(widget, "_sync_mode"):
-                    widget._sync_mode(widget.currentText())
 
             elif isinstance(widget, QCheckBox):
-                widget.blockSignals(True)
                 widget.setChecked(value if isinstance(value, bool) else str(value).strip().lower() in ("yes", "true", "1"))
-                widget.blockSignals(False)
+
             elif isinstance(widget, LoadCombinationWidget):
-                widget.blockSignals(True)
                 if isinstance(value, list):
                     widget.update(value)
-                widget.blockSignals(False)
 
-            self.working_input_dict[name] = value
+            self.working_input_dict[key] = value
 
     def showEvent(self, event):  # Qt event: refreshes active sub-tabs when dialog is shown or reopened
         super().showEvent(event)
