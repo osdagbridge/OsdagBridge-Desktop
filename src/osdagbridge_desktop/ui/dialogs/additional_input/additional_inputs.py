@@ -767,14 +767,16 @@ class AdditionalInputs(QDialog):
         if cb_type:
             # To fix some issue of not updating first time
             cur = cb_type.currentText()
-            cb_type.setCurrentText("IRC 5 - High Containment RCC Crash Barrier")
+            other = "IRC 5 - High Containment RCC Crash Barrier" if cur != "IRC 5 - High Containment RCC Crash Barrier" else "IRC 5 - RCC Crash Barrier"
+            cb_type.setCurrentText(other)
             cb_type.setCurrentText(cur)
 
         # Refresh median for correct compute value (skipped when no median is included)
         md_type = self.findChild(QComboBox, KEY_MD_TYPE)
         if md_type and str(self.working_input_dict.get(KEY_INCLUDE_MEDIAN)).strip().lower() == "yes":
             cur = md_type.currentText()
-            md_type.setCurrentText("IRC 5 - Raised Kerb")
+            other = "IRC 5 - Raised Kerb" if cur != "IRC 5 - Raised Kerb" else "IRC 5 - RCC Crash Barrier"
+            md_type.setCurrentText(other)
             md_type.setCurrentText(cur)
 
         # Refresh railing for correct compute value
