@@ -721,7 +721,7 @@ class AdditionalInputs(QDialog):
 
         # Refresh crash barrier for correct compute value
         cb_type = self.findChild(QComboBox, KEY_CB_TYPE)
-        if cb_type:
+        if cb_type and cb_type.currentText().strip() != "Custom":
             # To fix some issue of not updating first time
             cur = cb_type.currentText()
             cb_type.setCurrentText("IRC 5 - High Containment RCC Crash Barrier")
@@ -729,22 +729,24 @@ class AdditionalInputs(QDialog):
 
         # Refresh median for correct compute value (skipped when no median is included)
         md_type = self.findChild(QComboBox, KEY_MD_TYPE)
-        if md_type and str(self.working_input_dict.get(KEY_INCLUDE_MEDIAN)).strip().lower() == "yes":
+        if md_type and md_type.currentText().strip() != "Custom" and str(self.working_input_dict.get(KEY_INCLUDE_MEDIAN)).strip().lower() == "yes":
             cur = md_type.currentText()
             md_type.setCurrentText("IRC 5 - Raised Kerb")
             md_type.setCurrentText(cur)
 
         # Refresh railing for correct compute value
         rl_type = self.findChild(QComboBox, KEY_RL_TYPE)
-        if rl_type:
+        if rl_type and rl_type.currentText().strip() != "Custom":
             cur = rl_type.currentText()
             other = "IRC 5 - Steel Railing" if cur != "IRC 5 - Steel Railing" else "IRC 5 - RCC Railing"
             rl_type.setCurrentText(other)
             rl_type.setCurrentText(cur)
+        elif rl_type and str(self.working_input_dict.get(KEY_RL_LOAD_MODE) or "").strip() == "Custom":
+            self._set_enabled(self.findChild(QLineEdit, KEY_RL_LOAD_VALUE), True)
 
         # Refresh wearing course for correct compute value
         wc_mat = self.findChild(QComboBox, KEY_WC_MATERIAL)
-        if wc_mat:
+        if wc_mat and wc_mat.currentText().strip() != "Custom":
             cur = wc_mat.currentText()
             other = "Bituminous" if cur != "Bituminous" else "Concrete"
             wc_mat.setCurrentText(other)
