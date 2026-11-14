@@ -1621,7 +1621,6 @@ class CustomWindow(QWidget):
         from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
         from OCC.Core.Interface import Interface_Static
         from OCC.Core.IFSelect import IFSelect_RetDone
-        from OCC.Core.StlAPI import StlAPI_Writer
         from OCC.Core import BRepTools
         from OCC.Core import IGESControl
         
@@ -1660,11 +1659,16 @@ class CustomWindow(QWidget):
             return
 
         # Open save dialog
-        files_types = "IGS (*.igs);;STEP (*.stp);;STL (*.stl);;IFC (*.ifc);;BREP (*.brep)"
+        stl_ascii_filter = "STL (ASCII) (*.stl)"
+        files_types = (
+            f"IGS (*.igs);;STEP (*.stp);;STL (Binary) (*.stl);;{stl_ascii_filter};;"
+            "IFC (*.ifc);;BREP (*.brep)"
+        )
         default_path = get_documents_folder()
         
-        filePath, _ = QFileDialog.getSaveFileName(self, 'Export', os.path.join(default_path, "untitled.igs"),
-                                                      files_types)
+        filePath, selected_filter = QFileDialog.getSaveFileName(
+            self, 'Export', os.path.join(default_path, "untitled.igs"), files_types
+        )
         
         fName = str(filePath)
 
@@ -1710,9 +1714,33 @@ class CustomWindow(QWidget):
                     raise Exception("STEP export failed")
 
             elif file_extension == 'stl':
+                from OCC.Core.BRep import BRep_Tool
+                from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Copy
+                from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
+                from OCC.Core.StlAPI import StlAPI_Writer
+                from OCC.Core.TopAbs import TopAbs_FACE
+                from OCC.Core.TopExp import TopExp_Explorer
+                from OCC.Core.TopLoc import TopLoc_Location
+                from OCC.Core.TopoDS import topods
+
+                # Copy the topology and leave the viewer's triangulations on the source.
+                export_shape = BRepBuilderAPI_Copy(fuse_model, False, False).Shape()
+                mesh = BRepMesh_IncrementalMesh(export_shape, 0.5, False, 0.5, True)
+                faces = TopExp_Explorer(export_shape, TopAbs_FACE)
+                if not mesh.IsDone() or not faces.More():
+                    raise RuntimeError("Could not mesh the model for STL export")
+                location = TopLoc_Location()
+                while faces.More():
+                    face = topods.Face(faces.Current())
+                    triangulation = BRep_Tool.Triangulation(face, location)
+                    if triangulation is None or not triangulation.NbTriangles():
+                        raise RuntimeError("A model face could not be meshed for STL export")
+                    faces.Next()
+
                 stl_writer = StlAPI_Writer()
-                stl_writer.SetASCIIMode(True)
-                stl_writer.Write(fuse_model, fName)
+                stl_writer.SetASCIIMode(selected_filter == stl_ascii_filter)
+                if not stl_writer.Write(export_shape, fName):
+                    raise RuntimeError("STL export failed")
 
             elif file_extension == 'ifc':
                 
