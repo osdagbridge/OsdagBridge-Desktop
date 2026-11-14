@@ -639,7 +639,13 @@ class OutputDock(QWidget):
                     tmp.params.update(top_view.params)      # same bridge as live
                     tmp.girder = dict(top_view.girder)
                     tmp.stiffener = dict(top_view.stiffener)
+
+                    # Original Plan View for Chapter 6.
                     figure_data['girder_top'] = tmp.render_to_bytes()
+
+                    # Marked Plan View for Chapter 4, before Table 4.2.
+                    tmp.show_support_markings = True
+                    figure_data['girder_top_support_marked'] = tmp.render_to_bytes()
                     tmp.deleteLater()
             except Exception as exc:
                 logger.warning("Could not capture top view: %s", exc)

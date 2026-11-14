@@ -33,6 +33,7 @@ class TopViewCADWidget(QWidget):
         self.show_dimensions = True
         self.show_span_values = False
         self.show_carriageway_values = False
+        self.show_support_markings = False  ## Added a flag to enable A/B support markings only for the Chapter 4 report view.
         self.setMouseTracking(True)  # enable mouse tracking for hover
         
         # top view hover tracking 
@@ -1129,12 +1130,46 @@ class TopViewCADWidget(QWidget):
                                         skew_rad, scale, left_bearing_base_x)
 
         # Add dimensions (always visible) and hover labels (only on hover)
-        if self.show_dimensions:
+        if self.show_dimensions and not self.show_support_markings:
             self.add_clean_top_view_dimensions(
                 painter, girder_lines, girder_positions_y, scale, n, bracing_positions_x,
                 skew_rad, start_x_base, end_x_base, left_bearing_base_x, right_bearing_base_x,
                 top_extent, bottom_extent, left_top_x, right_top_x,
                 GIRDER_COLOR, CROSS_BRACING_COLOR, END_DIAPHRAGM_COLOR
+            )
+        # Draw support region markings for report.
+        if self.show_support_markings:
+            marking_color = QColor(70, 70, 70)
+            painter.setPen(QPen(marking_color, 2.8, Qt.DashLine))
+            painter.setBrush(Qt.NoBrush)
+
+            padding_x = 35
+            padding_y = 25
+
+            left_rect = QRectF(
+                min(left_top_x, left_bottom_x) - padding_x,
+                top_extent - padding_y,
+                abs(left_bottom_x - left_top_x) + 2 * padding_x,
+                bottom_extent - top_extent + 2 * padding_y
+            )
+
+            right_rect = QRectF(
+                min(right_top_x, right_bottom_x) - padding_x,
+                top_extent - padding_y,
+                abs(right_bottom_x - right_top_x) + 2 * padding_x,
+                bottom_extent - top_extent + 2 * padding_y
+            )
+
+            painter.drawRect(left_rect)
+            painter.drawRect(right_rect)
+
+            painter.setFont(QFont("Arial", 25, QFont.Bold))
+            painter.setPen(QPen(marking_color, 1.5))
+            painter.drawText(
+                left_rect.center().x() - 5, left_rect.top() - 8, "A"
+            )
+            painter.drawText(
+                right_rect.center().x() - 5, right_rect.top() - 8, "B"
             )
 
         # Notes removed for cleaner layout in split view
