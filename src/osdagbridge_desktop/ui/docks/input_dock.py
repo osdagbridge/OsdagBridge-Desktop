@@ -1114,7 +1114,9 @@ class InputDock(QWidget):
 
         # Mark required fields as changed so solve_extend_basic_input_dict
         # runs on the next Design call and derives all computed defaults.
-        self.is_require_field_changed = True
+        self.is_require_field_changed = False
+        # Set it to false, so that after loading a dict solve_extend
+        # (which overwrites loaded additional inputs data) isnt called
         self.input_value_changed.emit()
 
     # ══════════════════════════════════════════════════════════════════════════

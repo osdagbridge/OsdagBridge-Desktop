@@ -288,9 +288,8 @@ class AdditionalInputs(QDialog):
                 widget.setText(text)
                 widget.blockSignals(False)
 
-                # If the no. of girder is changed in default, update the connecting fields
-                if name == KEY_TS_NO_OF_GIRDERS:
-                    widget.editingFinished.emit()
+                # Population must not trigger girder regeneration and overwrite
+                # saved member values. Dynamic views are refreshed below.
 
             elif isinstance(widget, QComboBox):
                 widget.blockSignals(True)
