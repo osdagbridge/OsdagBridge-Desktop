@@ -235,12 +235,12 @@ class InputDock(QWidget):
 
         self.save_input_btn = DockCustomButton("Save Input", ":/vectors/save.svg")
         self.save_input_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.save_input_btn.clicked.connect(lambda: self.parent.common_design_func("Save_OSI"))
+        self.save_input_btn.clicked.connect(lambda: self.parent.common_design_func("Save"))
         btn_layout.addWidget(self.save_input_btn)
 
         self.design_btn = DockCustomButton("Design", ":/vectors/design.svg")
         self.design_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.design_btn.clicked.connect(lambda _, trigger="Design": self.parent.common_design_func(trigger))
+        self.design_btn.clicked.connect(lambda: self.parent.common_design_func("Design"))
         btn_layout.addWidget(self.design_btn)
         return btn_layout
 
