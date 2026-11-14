@@ -90,6 +90,32 @@ from osdagbridge_core.utils.common import (
     KEY_TD_CB_SECTION_INPUTS_MATERIAL_GRADE,
     KEY_TD_ED_SECTION_INPUTS_MATERIAL_GRADE,
 )
+from osdagbridge_core.bridge_types.plate_girder.crossbracingforces import (
+    _CB_DIAG_PROP_KEYS,
+    _CB_TOP_CHORD_PROP_KEYS,
+    _CB_BOTTOM_CHORD_PROP_KEYS,
+    _ED_DIAG_PROP_KEYS,
+    _ED_TOP_CHORD_PROP_KEYS,
+    _ED_BOTTOM_CHORD_PROP_KEYS,
+)
+
+_PROP_LABEL_TO_FIELD = {
+    "L (m)":     "L",
+    "H (m)":     "H",
+    "B (m)":     "B",
+    "tw (m)":    "TW",
+    "tF (m)":    "TF",
+    "rz (cm)":   "RZ",
+    "M (Kg/m)":  "M",
+    "A (cm²)":   "A",
+    "Iz (cm⁴)":  "IZ",
+    "Iv (cm⁴)":  "IV",
+    "rv (cm)":   "RV",
+    "Zz (cm³)":  "ZZ",
+    "Zv (cm³)":  "ZV",
+    "Zuz (cm³)": "ZUZ",
+    "Zuv (cm³)": "ZUV",
+}
 
 # ── Style constants ───────────────────────────────────────────────────────────
 
@@ -1177,12 +1203,12 @@ class TransverseMemberDesign(QDialog):
             if w:
                 w.setText(val)
 
-        for card_name, designation, type_lbl in (
-            ("Bracing",      diag_des, diag_type_lbl),
-            ("Top Chord",    tc_des,   tc_type),
-            ("Bottom Chord", bc_des,   bc_type),
+        for card_name, designation, type_lbl, pkeys in (
+            ("Bracing",      diag_des, diag_type_lbl, _CB_DIAG_PROP_KEYS),
+            ("Top Chord",    tc_des,   tc_type,       _CB_TOP_CHORD_PROP_KEYS),
+            ("Bottom Chord", bc_des,   bc_type,       _CB_BOTTOM_CHORD_PROP_KEYS),
         ):
-            self._fill_section_card(card_name, designation, type_lbl)
+            self._fill_section_card(card_name, designation, type_lbl, prop_keys=pkeys, pair_id=pair_id)
 
     def _populate_ed_pair_details(self, pair_key: str) -> None:
         # ── Always-visible fields ────────────────────────────────────────────
@@ -1286,12 +1312,12 @@ class TransverseMemberDesign(QDialog):
                 if w:
                     w.setText(val)
 
-            for card_name, designation, type_lbl in (
-                ("ed_End Diaphragm", diag_des, diag_type_lbl),
-                ("ed_Top Chord",     tc_des,   tc_type),
-                ("ed_Bottom Chord",  bc_des,   bc_type),
+            for card_name, designation, type_lbl, pkeys in (
+                ("ed_End Diaphragm", diag_des, diag_type_lbl, _ED_DIAG_PROP_KEYS),
+                ("ed_Top Chord",     tc_des,   tc_type,       _ED_TOP_CHORD_PROP_KEYS),
+                ("ed_Bottom Chord",  bc_des,   bc_type,       _ED_BOTTOM_CHORD_PROP_KEYS),
             ):
-                self._fill_section_card(card_name, designation, type_lbl)
+                self._fill_section_card(card_name, designation, type_lbl, prop_keys=pkeys, pair_id=pair_id)
 
     @staticmethod
     def _member_designs(pair_designs: dict, member_type: str, end_diaphragm: bool = False) -> dict:
@@ -1326,7 +1352,10 @@ class TransverseMemberDesign(QDialog):
         card_name:          str,
         designation:        str,
         section_type_label: str,
+        prop_keys:          dict | None = None,
+        pair_id:            str | None = None,
     ) -> None:
+        od = getattr(self._backend, "output_dict", {}) or {}
         props   = self._query_section_db(designation, section_type_label) if designation else {}
         preview = self._section_previews.get(card_name)
 
@@ -1348,8 +1377,14 @@ class TransverseMemberDesign(QDialog):
 
         fields = self._prop_fields.get(card_name, {})
         for prop_label, field in fields.items():
-            val = props.get(prop_label)
-            field.setText(f"{val:.4g}") if val is not None else field.clear()
+            val = None
+            if od and prop_keys and pair_id:
+                prop_key = prop_keys.get(_PROP_LABEL_TO_FIELD.get(prop_label, ""))
+                if prop_key:
+                    val = od.get(f"{prop_key}.{pair_id}")
+            if val is None:
+                val = props.get(prop_label)
+            field.setText(f"{float(val):.4g}") if val is not None else field.clear()
 
     def _query_section_db(self, designation: str, section_type_label: str = "") -> dict:
         if not designation:
@@ -1383,9 +1418,9 @@ class TransverseMemberDesign(QDialog):
                     return {
                         "_db_designation": db_des,
                         "_section_family": "angle",
-                        "L (m)":     round(a / 1000, 4),
-                        "H (m)":     round(b / 1000, 4),
-                        "B (m)":     round(t / 1000, 4),
+                        "L (m)":     None,
+                        "H (m)":     round(a / 1000, 4),
+                        "B (m)":     round(b / 1000, 4),
                         "tw (m)":    round(t / 1000, 4),
                         "tF (m)":    round(t / 1000, 4),
                         "rz (cm)":   rz,
@@ -1414,8 +1449,8 @@ class TransverseMemberDesign(QDialog):
             return {
                 "_db_designation": db_des,
                 "_section_family": "channel",
-                "L (m)":     round(d_val / 1000, 4),
-                "H (m)":     round(b     / 1000, 4),
+                "L (m)":     None,
+                "H (m)":     round(d_val / 1000, 4),
                 "B (m)":     round(b     / 1000, 4),
                 "tw (m)":    round(tw    / 1000, 4),
                 "tF (m)":    round(tf    / 1000, 4),
