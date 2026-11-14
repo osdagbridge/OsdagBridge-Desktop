@@ -718,6 +718,14 @@ class AdditionalInputs(QDialog):
     def refresh_typical_section(self):  # refresh: enables/disables Typical Section subtabs and widgets per conditions
         self._apply_tab_active_conditions(self._TYPICAL_SECTION_TAB_CONDITIONS)
         self._apply_widget_active_conditions(self._TYPICAL_SECTION_WIDGET_CONDITIONS)
+        # Footpath Pressure (Live Load) applies only when a footpath is present
+        has_footpath = self.working_input_dict.get(KEY_FOOTPATH) in (VALUES_FOOTPATH[1], VALUES_FOOTPATH[2])
+        fp_mode  = self.findChild(QComboBox, KEY_LL_FOOTPATH_PRESSURE_MODE)
+        fp_value = self.findChild(QLineEdit, KEY_LL_FOOTPATH_PRESSURE_VALUE)
+        self._set_enabled(fp_mode, has_footpath)
+        self._set_enabled(self.findChild(QLabel, KEY_LL_FOOTPATH_PRESSURE + "_label"), has_footpath)
+        if fp_mode:
+            self._set_enabled(fp_value, has_footpath and fp_mode.currentText() != fp_mode.itemText(0))
 
         # Refresh crash barrier for correct compute value
         cb_type = self.findChild(QComboBox, KEY_CB_TYPE)
