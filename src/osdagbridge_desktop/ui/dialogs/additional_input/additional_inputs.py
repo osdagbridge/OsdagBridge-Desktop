@@ -216,40 +216,11 @@ class AdditionalInputs(QDialog):
             self.findChildren(QPushButton)
         )
         for w in widgets:
-            w.setEnabled(not lock)
+            w.setEnabled(not lock and not w.property("always_disabled"))
             if lock:
                 w.installEventFilter(self)
             else:
                 w.removeEventFilter(self)
-        if not lock:
-            self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE))
-
-    def on_analysis_engine_changed(self, engine: str) -> None:  # on_change: sets and locks the Live Load boxes setu requires or cannot analyse; ospgrillage frees them
-        is_setu = engine == ENGINE_SETU
-        for keys, checked in ((SETU_REQUIRED_VEHICLES, True), (SETU_UNSUPPORTED_VEHICLES, False)):
-            for key in keys:
-                box = self.findChild(QCheckBox, key)
-                if is_setu:
-                    self.working_input_dict[key] = checked
-                    if box:
-                        box.setChecked(checked)
-                self._set_enabled(box, not is_setu)
-        # The girder design runs every limit-state check and uses fixed partial factors: with setu those inputs show what
-        # is used and are locked (the report prints them).
-        for key in SETU_ALWAYS_CHECKED:
-            box = self.findChild(QCheckBox, key)
-            if is_setu:
-                self.working_input_dict[key] = True
-                if box:
-                    box.setChecked(True)
-            self._set_enabled(box, not is_setu)
-        for key, value in SETU_FIXED_DESIGN_FACTORS.items():
-            field = self.findChild(QLineEdit, key)
-            if is_setu:
-                self.working_input_dict[key] = value
-                if field:
-                    field.setText(value)
-            self._set_enabled(field, not is_setu)
 
     def _set_enabled(self, widget, enabled: bool):  # setEnabled wrapper used by mode/customize handlers — never re-enables a widget while the dialog is locked
         if widget:
@@ -281,7 +252,6 @@ class AdditionalInputs(QDialog):
             self.initial_default_dict = deepcopy(input_dict)
 
         self.set_defaults()
-        self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE, ENGINE_SETU))
 
         # clear() + update() keeps the same dict object (shared with template_page)
         # and drops keys removed from working_input_dict, e.g. stale .G{n} keys
@@ -582,8 +552,6 @@ class AdditionalInputs(QDialog):
                     widget.update(value)
 
             self.working_input_dict[key] = value
-
-        self.on_analysis_engine_changed(self.working_input_dict.get(KEY_ANALYSIS_ENGINE))
 
     def showEvent(self, event):  # Qt event: refreshes active sub-tabs when dialog is shown or reopened
         super().showEvent(event)
@@ -3246,17 +3214,8 @@ class AdditionalInputs(QDialog):
             KEY_SL_VERTICAL_COEFF:    str(Av),
         }
 
-    def _compute_wind_values(self, working_input_dict: dict) -> dict:  # compute: Vz and Pz as the selected engine works them out (setu: IRC 6 cl. 209 as amended; ospgrillage: IRC 6 Table 12)
+    def _compute_wind_values(self, working_input_dict: dict) -> dict:  # compute: derives hourly mean wind speed and pressure from IRC 6 wind inputs
         from osdagbridge_core.utils.codes.irc6_2017 import IRC6_2017
-
-        if working_input_dict.get(KEY_ANALYSIS_ENGINE, ENGINE_SETU) == ENGINE_SETU:
-            from osdagbridge_core.core.solvers.setu.analysis_engine import wind_report
-            from osdagbridge_core.core.solvers.setu.bridge_input import wind_site
-            try:
-                computed = wind_report(wind_site(working_input_dict))
-            except (KeyError, TypeError, ValueError):
-                return {}
-            return {key: f"{value:.2f}" for key, value in computed.items()}
 
         basic_wind_speed_str = working_input_dict.get(KEY_WL_BASIC_WIND_SPEED)
         height_str = working_input_dict.get(KEY_WL_AVG_EXPOSED_HEIGHT)
@@ -3303,9 +3262,7 @@ class AdditionalInputs(QDialog):
         except ValueError:
             return {}
 
-        res = IRC6_2017.cl_215_2_effective_bridge_temperature(
-            max_temp, min_temp, 'metallic', bool(working_input_dict.get(KEY_TL_SNOWBOUND))
-        )
+        res = IRC6_2017.cl_215_2_effective_bridge_temperature(max_temp, min_temp, 'metallic', False)
         t_min = res.get('T_min', 0)
         t_max = res.get('T_max', 0)
 

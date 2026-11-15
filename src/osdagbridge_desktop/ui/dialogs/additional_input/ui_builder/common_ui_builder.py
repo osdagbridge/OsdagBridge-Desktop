@@ -720,6 +720,9 @@ class UIBuilder(QWidget):
             field = QCheckBox(label_text)
             field.setObjectName(field_def.get("id"))
             field.setChecked(field_def.get("default_checked", False))
+            if field_def.get("enabled") is False:   # disabled by the schema: stays disabled through unlock too
+                field.setEnabled(False)
+                field.setProperty("always_disabled", True)
             field.setStyleSheet("""
                 QCheckBox { font-size: 11px; color: #333; spacing: 6px; }
                 QCheckBox:disabled { font-size: 11px; color: #aaaaaa; spacing: 6px; }
@@ -736,21 +739,6 @@ class UIBuilder(QWidget):
             on_change = field_def.get("on_change") or ""
             if on_change and hasattr(owner, on_change):
                 field.stateChanged.connect(getattr(owner, on_change))
-            on_change_compute = field_def.get("on_change_compute")
-            if on_change_compute and ai:
-                func_name = on_change_compute.get("function", "")
-                if func_name and hasattr(ai, func_name):
-                    def _trigger_compute(*_args, _ai=ai, _fn=func_name, _root=self):
-                        result = getattr(_ai, _fn)(_ai.working_input_dict)
-                        if not isinstance(result, dict):
-                            return
-                        for widget_id, value in result.items():
-                            w = _root.findChild(QLineEdit, widget_id)
-                            if w:
-                                w.setText(str(value) if value is not None else "")
-                    field.stateChanged.connect(_trigger_compute)
-                    if func_name not in ai._compute_functions:
-                        ai._compute_functions.append(func_name)
             return field
 
         elif ftype == TYPE_TEXTBOX:
