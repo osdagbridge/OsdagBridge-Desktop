@@ -1453,12 +1453,14 @@ class MainWindow(QMainWindow):
     # If osi_path=None -> it triggers Load Osi else trigger open recent project
     def common_osi_load(self, osi_path=None, id=None):
 
-        filePath, _ = QFileDialog.getOpenFileName(
-            self,
-            "Load Design Inputs",
-            get_documents_folder(),
-            "Input Files (*.osi)",
-        )
+        filePath = osi_path
+        if not filePath:
+            filePath, _ = QFileDialog.getOpenFileName(
+                self,
+                "Load Design Inputs",
+                get_documents_folder(),
+                "Input Files (*.osi)",
+            )
         if not filePath:
             return
         
