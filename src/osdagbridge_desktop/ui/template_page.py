@@ -663,7 +663,7 @@ class CustomWindow(QWidget):
 
     def common_design_func(self, trigger: str, target_tab: str = None):
         """
-        Trigger belongs to one of ["Design", "Save", "Additional Inputs"]
+        Trigger belongs to one of ["Design", "Save_OSI", "Additional Inputs"]
         """
         # print(f"[DEBUG]plot:{self.plots_view_active}")
         # print(f"[DEBUG]3d:{self.cad_3d_view_active}")
