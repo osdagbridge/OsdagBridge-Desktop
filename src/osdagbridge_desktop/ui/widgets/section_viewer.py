@@ -114,16 +114,22 @@ class SectionPreviewWidget(QWidget):
         self._dimension_info: Optional[dict] = None
         self._section_fill = True
 
-    def set_section(self, section_type: str, designation: str, show_double_total: bool = True) -> None:
+    def set_section(
+        self, section_type: str, designation: str, show_double_total: bool = True,
+        use_catalog_labels: bool = False,
+    ) -> None:
         """
         section_type: one of [angle, double_angle_long, double_angle_short, channel, double_channel]
         designation: designation string present in the DB (for doubles, pass base designation without the leading 2-)
         show_double_total: for double-angle/channel, whether to show total envelope width/height (default True).
+        use_catalog_labels: label angle legs H=a and B=b instead of screen width/height.
         """
         self._section_type = section_type
         self._designation = designation
         self._geometry = self._build_geometry(section_type, designation)
-        self._dimension_info = self._dimension_for(section_type, designation, show_double_total)
+        self._dimension_info = self._dimension_for(
+            section_type, designation, show_double_total, use_catalog_labels,
+        )
         self._section_fill = section_type in (
             "angle",
             "double_angle_long",
@@ -133,7 +139,10 @@ class SectionPreviewWidget(QWidget):
         )
         self.update()
 
-    def _dimension_for(self, section_type: str, designation: str, show_double_total: bool = True) -> Optional[dict]:
+    def _dimension_for(
+        self, section_type: str, designation: str, show_double_total: bool = True,
+        use_catalog_labels: bool = False,
+    ) -> Optional[dict]:
         if not designation:
             return None
         if section_type in ("angle", "double_angle_long", "double_angle_short"):
@@ -142,6 +151,12 @@ class SectionPreviewWidget(QWidget):
                 return None
             # For single angles: take 'a' as horizontal (W) and 'b' as vertical (H)
             dims = {"kind": "angle", "w": angle.a, "h": angle.b, "t": angle.t}
+            dims["w_label"], dims["h_label"] = "W", "H"
+            if use_catalog_labels:
+                if section_type == "double_angle_long":
+                    dims["w_label"], dims["h_label"] = "B", "H"
+                else:
+                    dims["w_label"], dims["h_label"] = "H", "B"
             # For double angles, optionally report total envelope or single-leg width
             if section_type == "double_angle_long":
                 if show_double_total:
@@ -398,17 +413,17 @@ class SectionPreviewWidget(QWidget):
         max_dim = max(bbox.width(), bbox.height())
         offset = max(6.0, min(14.0, max_dim * 0.12))
 
-        # W dimension (horizontal at bottom for double angles, at top for single)
+        # Horizontal dimension (at bottom for double angles, at top for single)
         if is_double:
             self._draw_dim_line_h(painter, scale, x_left, x_right, y_bottom + offset,
-                                  "W", self._fmt_val(b_val), label_pos="above")
+                                  info["w_label"], self._fmt_val(b_val), label_pos="above")
         else:
             self._draw_dim_line_h(painter, scale, x_left, x_right, y_top - offset,
-                                  "W", self._fmt_val(b_val), label_pos="below")
+                                  info["w_label"], self._fmt_val(b_val), label_pos="below")
 
-        # H dimension (vertical on left)
+        # Vertical dimension (on left)
         self._draw_dim_line_v(painter, scale, y_top, y_bottom, x_left - offset,
-                              "H", self._fmt_val(a_val))
+                              info["h_label"], self._fmt_val(a_val))
 
         # t dimension (thickness) â€” place at the center vertical stem for double angles, at the vertical leg for single angle.
         if t > 0:

@@ -1371,7 +1371,8 @@ class TransverseMemberDesign(QDialog):
                     stype = _SECTION_TYPE_MAP.get(section_type_label, "double_angle_long")
                     if stype in ("channel", "double_channel"):
                         stype = "angle"
-                preview.set_section(stype, db_des)
+                # Match the card's individual-angle dimensions: H=a and B=b.
+                preview.set_section(stype, db_des, False, True)
             else:
                 preview.clear()
 
