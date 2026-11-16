@@ -942,24 +942,7 @@ def _section_lines(output_dict, pair_id, type_key, desig_key):
 
 
 def _leg_width(output_dict, pair_id, type_key, w_key, l_key):
-    """Leg width in mm, as display text.
-
-    For angles the design phase writes the thickness into the leg_w key, because
-    _query_crossbracing_section() keeps an angle's thickness under "B".  The long leg
-    it keeps under "L", saved as the PROP_L key in metres, so read the width from there.
-
-    Read with the default ordering, **not** input_first: this asks what the design
-    classified the section as, which is the only thing that says whether leg_w holds a
-    thickness.  _section_lines() above reads the same key input-first because the label
-    should name what the user chose, but that string ("Double Angle (Short Leg)") would
-    never match here, and the width would silently fall back to the thickness again.
-    """
-    designed_type = _resolve(output_dict, type_key, pair_id)
-    if str(designed_type).strip().upper() == "ANGLE":
-        try:
-            return _fmt_mm(float(output_dict.get(f"{l_key}.{pair_id}")) * 1e3)
-        except (TypeError, ValueError):
-            pass
+    """Read the section leg width in millimetres."""
     return _fmt_mm(_resolve(output_dict, w_key, pair_id))
 
 

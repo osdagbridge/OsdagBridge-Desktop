@@ -1418,7 +1418,6 @@ class TransverseMemberDesign(QDialog):
                     return {
                         "_db_designation": db_des,
                         "_section_family": "angle",
-                        "L (m)":     None,
                         "H (m)":     round(a / 1000, 4),
                         "B (m)":     round(b / 1000, 4),
                         "tw (m)":    round(t / 1000, 4),
@@ -1449,7 +1448,6 @@ class TransverseMemberDesign(QDialog):
             return {
                 "_db_designation": db_des,
                 "_section_family": "channel",
-                "L (m)":     None,
                 "H (m)":     round(d_val / 1000, 4),
                 "B (m)":     round(b     / 1000, 4),
                 "tw (m)":    round(tw    / 1000, 4),
