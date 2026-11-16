@@ -2023,7 +2023,7 @@ class CustomWindow(QWidget):
 
         quit_action = QAction("Quit", self)
         quit_action.setShortcut(QKeySequence("Shift+Q"))
-        quit_action.triggered.connect(lambda: self.close())
+        quit_action.triggered.connect(lambda: self.parent.close_osdag())
         file_menu.addAction(quit_action)
 
         # Graphics Menu
