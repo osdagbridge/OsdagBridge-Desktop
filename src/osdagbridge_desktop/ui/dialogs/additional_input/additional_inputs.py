@@ -216,7 +216,7 @@ class AdditionalInputs(QDialog):
             self.findChildren(QPushButton)
         )
         for w in widgets:
-            w.setEnabled(not lock)
+            w.setEnabled(not lock and not w.property("always_disabled"))
             if lock:
                 w.installEventFilter(self)
             else:

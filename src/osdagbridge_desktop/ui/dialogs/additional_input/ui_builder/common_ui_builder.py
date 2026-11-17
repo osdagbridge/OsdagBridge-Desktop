@@ -720,6 +720,9 @@ class UIBuilder(QWidget):
             field = QCheckBox(label_text)
             field.setObjectName(field_def.get("id"))
             field.setChecked(field_def.get("default_checked", False))
+            if field_def.get("enabled") is False:   # disabled by the schema: stays disabled through unlock too
+                field.setEnabled(False)
+                field.setProperty("always_disabled", True)
             field.setStyleSheet("""
                 QCheckBox { font-size: 11px; color: #333; spacing: 6px; }
                 QCheckBox:disabled { font-size: 11px; color: #aaaaaa; spacing: 6px; }
