@@ -941,11 +941,6 @@ def _section_lines(output_dict, pair_id, type_key, desig_key):
     return lines
 
 
-def _leg_width(output_dict, pair_id, type_key, w_key, l_key):
-    """Read the section leg width in millimetres."""
-    return _fmt_mm(_resolve(output_dict, w_key, pair_id))
-
-
 def _bracing_member_label(output_dict, component, pair_id, role):
     """Build the tooltip for one (component, girder pair, member role).
 
@@ -959,11 +954,11 @@ def _bracing_member_label(output_dict, component, pair_id, role):
              f"Location: {_pair_label(pair_id)}"]
 
     if role in role_keys:
-        type_key, desig_key, h_key, w_key, t_key, l_key = role_keys[role]
+        type_key, desig_key, h_key, w_key, t_key, _ = role_keys[role]
         lines.extend(_section_lines(output_dict, pair_id, type_key, desig_key))
 
         leg_h = _fmt_mm(_resolve(output_dict, h_key, pair_id))
-        leg_w = _leg_width(output_dict, pair_id, type_key, w_key, l_key)
+        leg_w = _fmt_mm(_resolve(output_dict, w_key, pair_id))
         if leg_h and leg_w:
             lines.append(f"Leg H x W: {leg_h} x {leg_w}")
         thickness = _fmt_mm(_resolve(output_dict, t_key, pair_id))
