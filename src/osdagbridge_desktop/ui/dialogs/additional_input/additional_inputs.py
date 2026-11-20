@@ -440,6 +440,7 @@ class AdditionalInputs(QDialog):
 
         # In Custom mode re-apply conditional sub-field states------------------------
         if not is_optimized:
+            self._update_intermediate_stiffener_dropdown()
             w = self.findChild(QComboBox, KEY_MP_STIFFENER_INTERMEDIATE)
             if w:
                 self._on_intermediate_stiffener_changed(w.currentText(), restore_default=False)
@@ -1622,6 +1623,8 @@ class AdditionalInputs(QDialog):
     def _save_member_fields_connector(self, origin_key: str, target_widget: QWidget) -> None:  # END_CONNECTOR: triggers save of current member's girder fields on any section input change
         gi, mi = self._get_current_girder_member_indices()
         self._save_member_fields()
+        if origin_key == KEY_MP_GIRDER_WEB_TYPE:
+            self._update_intermediate_stiffener_dropdown()
 
     def _on_is_section_changed(self, origin_key: str, target_widget: QWidget) -> None:  # END_CONNECTOR: writes the selected IS section's catalogue dimensions into the current Rolled member's size keys
         """
@@ -2154,6 +2157,7 @@ class AdditionalInputs(QDialog):
 
         is_optimized = str(self.working_input_dict.get(KEY_DESIGN_MODE, "Optimized")).strip() == "Optimized"
         if not is_optimized:
+            self._update_intermediate_stiffener_dropdown()
             w = self.findChild(QComboBox, KEY_MP_STIFFENER_INTERMEDIATE)
             if w:
                 self._on_intermediate_stiffener_changed(w.currentText(), restore_default=False)
@@ -2165,6 +2169,53 @@ class AdditionalInputs(QDialog):
                 self._on_bearing_stiffener_count_changed(w.currentText())
 
         self._update_stiffener_cad()
+
+    def _update_intermediate_stiffener_dropdown(self) -> None:
+        """Disable 'No' option in Intermediate Stiffener dropdown when Web Type is 'Thin Web with ITS'."""
+        import re
+        # Read the stiffener tab's currently selected member
+        combo = self.findChild(QComboBox, KEY_MP_STIFFENER_SELECT_MEMBER_ID)
+        member_id = combo.currentText().strip() if combo else ""
+        if not member_id:
+            return
+
+        m = re.match(r"G(\d+)M(\d+)", member_id)
+        if not m:
+            return
+        suffix = f".G{m.group(1)}.M{m.group(2)}"
+
+        web_type = self.working_input_dict.get(KEY_MP_GIRDER_WEB_TYPE + suffix)
+        if web_type is None:
+            web_type = self.working_input_dict.get(KEY_MP_GIRDER_WEB_TYPE)
+
+        is_thin_web = str(web_type or "").strip().lower() == "thin web with its"
+
+        stiff_combo = self.findChild(QComboBox, KEY_MP_STIFFENER_INTERMEDIATE)
+        if stiff_combo is None:
+            return
+
+        # Ensure SmartCursorComboBoxView is installed so disabled items show forbidden cursor
+        if not isinstance(stiff_combo.view(), SmartCursorComboBoxView):
+            stiff_combo.setView(SmartCursorComboBoxView())
+
+        no_idx = stiff_combo.findText("No")
+        if no_idx >= 0 and hasattr(stiff_combo.model(), "item"):
+            item = stiff_combo.model().item(no_idx)
+            if item is not None:
+                item.setEnabled(not is_thin_web)
+                if is_thin_web:
+                    item.setForeground(Qt.gray)
+                else:
+                    from PySide6.QtWidgets import QApplication
+                    item.setForeground(QApplication.palette().text())
+
+        # Force-switch to 'Yes' if 'No' is currently selected and now disabled
+        if is_thin_web and stiff_combo.currentText().strip() == "No":
+            yes_idx = stiff_combo.findText("Yes")
+            if yes_idx >= 0:
+                stiff_combo.blockSignals(True)
+                stiff_combo.setCurrentIndex(yes_idx)
+                stiff_combo.blockSignals(False)
 
     def _on_intermediate_stiffener_changed(self, value: str, restore_default: bool = True) -> None:  # on_change: enables or disables intermediate stiffener sub-fields, auto-calculates spacing as 1.5 × web_depth when Yes
         import re
