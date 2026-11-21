@@ -1272,9 +1272,18 @@ class TransverseMemberDesign(QDialog):
             # Section types follow the same mode rule as the designations, so
             # the type and designation shown never disagree (e.g. a "Channel"
             # left over from a Custom run next to a designed angle).
-            diag_type_lbl = self._section_type_label(od.get(f"{KEY_MP_ED_BRACING_SECTION}.{pair_id}", ""))
-            tc_type_lbl   = self._section_type_label(od.get(f"{KEY_MP_ED_TOP_CHORD_SECTION_TYPE}.{pair_id}", ""))
-            bc_type_lbl   = self._section_type_label(od.get(f"{KEY_MP_ED_BOTTOM_CHORD_SECTION_TYPE}.{pair_id}", ""))
+            # The designed value only says Angle or Channel, so the user's own
+            # choice (e.g. a single Angle) is used the same way as on Cross Bracing.
+            _m = re.match(r"G(\d+)G\d+", pair_id)
+            _ed_sfx = (f".{pair_id}.E{_m.group(1)}M1", f".{pair_id}.E{_m.group(1)}M2") if _m else ()
+
+            def _ed_type_lbl(key):
+                user = next((od.get(f"{key}{s}") for s in _ed_sfx if od.get(f"{key}{s}")), None)
+                return self._resolve_section(self._section_type_label(od.get(f"{key}.{pair_id}", "")), user)
+
+            diag_type_lbl = _ed_type_lbl(KEY_MP_ED_BRACING_SECTION)
+            tc_type_lbl   = _ed_type_lbl(KEY_MP_ED_TOP_CHORD_SECTION_TYPE)
+            bc_type_lbl   = _ed_type_lbl(KEY_MP_ED_BOTTOM_CHORD_SECTION_TYPE)
 
             # Chord enabled flags (per-member ED inputs); disabled chord → blank
             tc_on = str(od.get(f"{KEY_MP_ED_TOP_CHORD}.{pair_id}")).strip().lower() not in ("no", "false", "0")
