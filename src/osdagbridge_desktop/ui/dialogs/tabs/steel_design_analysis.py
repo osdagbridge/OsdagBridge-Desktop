@@ -21,6 +21,7 @@ from osdagbridge_desktop.ui.docks.output_dock import (
     NoScrollComboBox,
 )
 from osdagbridge_desktop.ui.utils.styled_scroll_area import StyledScrollArea
+from osdagbridge_desktop.ui.utils.theme_manager import get_current_theme
 
 # Fallback load combination labels used to pre-populate the dropdown before
 # live load cases are discovered from the analyser results.
@@ -174,7 +175,8 @@ class _HTMLDelegate(QStyledItemDelegate):
         painter.save()
         doc = QTextDocument()
         doc.setDefaultFont(options.font)
-        doc.setHtml(options.text)
+        text_color = "#FFFFFF" if get_current_theme() == "dark" else "#000000"
+        doc.setHtml(f"<span style='color: {text_color};'>{options.text}</span>")
         options.text = ""
         style = options.widget.style() if options.widget else QApplication.style()
         style.drawControl(QStyle.CE_ItemViewItem, options, painter)
@@ -235,7 +237,8 @@ class RichTextComboBox(NoScrollComboBox):
         
         doc = QTextDocument()
         doc.setDefaultFont(self.font())
-        doc.setHtml(text)
+        text_color = "#FFFFFF" if get_current_theme() == "dark" else "#000000"
+        doc.setHtml(f"<span style='color: {text_color};'>{text}</span>")
         
         painter.save()
         painter.translate(text_rect.topLeft())
