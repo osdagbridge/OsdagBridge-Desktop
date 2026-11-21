@@ -1,0 +1,52 @@
+
+{
+  "suite_id": "BP-GEOMETRY-001",
+  "suite_name": "Bridge Cross Section Width Verification",
+  "module": "plate_girder.bridge_geometry",
+  "operation": "calculate_bridge_width",
+  "description": "Verifies bridge width for different footpath configurations.",
+  "cases": [
+    {
+      "test_id": "BP-GEO-001",
+      "description": "Bridge without footpaths",
+      "inputs": {
+        "carriageway_width": 7.5,
+        "crash_barrier_width": 0.45,
+        "no_of_footpaths": 0,
+        "footpath_width": 1.5,
+        "railing_width": 0.3,
+        "median_width": 1.2
+      },
+      "expected": 9.6,
+      "tolerance": 0.000001
+    },
+    {
+      "test_id": "BP-GEO-002",
+      "description": "Bridge with one footpath",
+      "inputs": {
+        "carriageway_width": 7.5,
+        "crash_barrier_width": 0.45,
+        "no_of_footpaths": 1,
+        "footpath_width": 1.5,
+        "railing_width": 0.3,
+        "median_width": 1.2
+      },
+      "expected": 11.4,
+      "tolerance": 0.000001
+    },
+    {
+      "test_id": "BP-GEO-003",
+      "description": "Bridge with two footpaths",
+      "inputs": {
+        "carriageway_width": 7.5,
+        "crash_barrier_width": 0.45,
+        "no_of_footpaths": 2,
+        "footpath_width": 1.5,
+        "railing_width": 0.3,
+        "median_width": 1.2
+      },
+      "expected": 13.2,
+      "tolerance": 0.000001
+    }
+  ]
+}

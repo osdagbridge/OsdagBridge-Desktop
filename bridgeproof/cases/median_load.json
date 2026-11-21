@@ -1,0 +1,26 @@
+{
+  "suite_id": "BP-MEDIAN-001",
+  "suite_name": "Median Load Geometry Verification",
+  "module": "plate_girder.bridge_geometry",
+  "operation": "median_load_geometry",
+  "cases": [
+    {
+      "test_id": "BP-MEDIAN-001",
+      "description": "Verify median centreline",
+      "inputs": {
+        "span": 30.0,
+        "carriageway_width": 7.5,
+        "crash_barrier_width": 0.45,
+        "no_of_footpaths": 1,
+        "footpath_width": 1.5,
+        "railing_width": 0.3,
+        "median_width": 1.2
+      },
+      "expected": {
+        "start": {"x": 6.6, "z": 0.0},
+        "end": {"x": 6.6, "z": 30.0}
+      },
+      "tolerance": 0.000001
+    }
+  ]
+}

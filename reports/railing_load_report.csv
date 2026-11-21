@@ -1,0 +1,2 @@
+test_id,status,expected,expected_error,actual,error
+BP-RAILING-001,PASSED,"{""start"": {""x"": 0.15, ""z"": 0.0}, ""end"": {""x"": 0.15, ""z"": 30.0}}",,"{""start"": {""x"": 0.15, ""z"": 0.0}, ""end"": {""x"": 0.15, ""z"": 30.0}}",

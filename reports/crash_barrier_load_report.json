@@ -1,0 +1,40 @@
+{
+    "suite_id": "BP-BARRIER-001",
+    "suite_name": "Crash Barrier Load Geometry Verification",
+    "operation": "crash_barrier_load_geometry",
+    "timestamp": "2026-11-21T12:08:52.873900+00:00",
+    "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0
+    },
+    "results": [
+        {
+            "test_id": "BP-BARRIER-001",
+            "status": "PASSED",
+            "expected": {
+                "start": {
+                    "x": 2.025,
+                    "z": 0.0
+                },
+                "end": {
+                    "x": 2.025,
+                    "z": 30.0
+                }
+            },
+            "expected_error": null,
+            "actual": {
+                "start": {
+                    "x": 2.025,
+                    "z": 0.0
+                },
+                "end": {
+                    "x": 2.025,
+                    "z": 30.0
+                }
+            },
+            "error": null
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "suite_id": "BP-GEOMETRY-001",
+    "suite_name": "Bridge Cross Section Width Verification",
+    "module": "plate_girder.bridge_geometry",
+    "operation": "calculate_bridge_width",
+    "executed_at": "2026-11-21T10:20:12.527884+00:00",
+    "summary": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1,
+        "errors": 0
+    },
+    "results": [
+        {
+            "test_id": "BP-GEO-001",
+            "description": "Bridge without footpaths",
+            "status": "FAILED",
+            "expected": 10.0,
+            "actual": 9.6,
+            "difference": 0.40000000000000036,
+            "tolerance": 1e-06,
+            "error": null
+        },
+        {
+            "test_id": "BP-GEO-002",
+            "description": "Bridge with one footpath",
+            "status": "PASSED",
+            "expected": 11.4,
+            "actual": 11.4,
+            "difference": 0.0,
+            "tolerance": 1e-06,
+            "error": null
+        },
+        {
+            "test_id": "BP-GEO-003",
+            "description": "Bridge with two footpaths",
+            "status": "PASSED",
+            "expected": 13.2,
+            "actual": 13.2,
+            "difference": 0.0,
+            "tolerance": 1e-06,
+            "error": null
+        }
+    ]
+}

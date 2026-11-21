@@ -1,0 +1,29 @@
+{
+  "suite_id": "BP-FOOTPATH-001",
+  "suite_name": "Footpath Load Geometry Verification",
+  "module": "plate_girder.bridge_geometry",
+  "operation": "footpath_load_geometry",
+  "cases": [
+    {
+      "test_id": "BP-FOOTPATH-001",
+      "description": "Verify left footpath load boundaries",
+      "inputs": {
+        "span": 30.0,
+        "carriageway_width": 7.5,
+        "crash_barrier_width": 0.45,
+        "no_of_footpaths": 1,
+        "footpath_width": 1.5,
+        "railing_width": 0.3,
+        "median_width": 1.2,
+        "side": "left"
+      },
+      "expected": {
+        "p1": {"x": 0.3, "z": 0.0},
+        "p2": {"x": 1.8, "z": 0.0},
+        "p3": {"x": 1.8, "z": 30.0},
+        "p4": {"x": 0.3, "z": 30.0}
+      },
+      "tolerance": 0.000001
+    }
+  ]
+}

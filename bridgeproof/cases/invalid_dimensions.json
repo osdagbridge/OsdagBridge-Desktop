@@ -1,0 +1,98 @@
+{
+    "suite_id": "BP-INVALID-001",
+    "suite_name": "Invalid Bridge Dimension Validation",
+    "operation": "calculate_bridge_width",
+    "cases": [
+        {
+            "test_id": "BP-INV-001",
+            "description": "Reject zero carriageway width",
+            "inputs": {
+                "carriageway_width": 0,
+                "crash_barrier_width": 0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": 1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-002",
+            "description": "Reject negative crash barrier width",
+            "inputs": {
+                "carriageway_width": 7.5,
+                "crash_barrier_width": -0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": 1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-003",
+            "description": "Reject negative median width",
+            "inputs": {
+                "carriageway_width": 7.5,
+                "crash_barrier_width": 0.45,
+                "median_width": -1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": 1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-004",
+            "description": "Reject negative footpath width",
+            "inputs": {
+                "carriageway_width": 7.5,
+                "crash_barrier_width": 0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": -1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-005",
+            "description": "Reject negative railing width",
+            "inputs": {
+                "carriageway_width": 7.5,
+                "crash_barrier_width": 0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": 1.5,
+                "railing_width": -0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-006",
+            "description": "Reject unsupported footpath count",
+            "inputs": {
+                "carriageway_width": 7.5,
+                "crash_barrier_width": 0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 3,
+                "footpath_width": 1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        },
+        {
+            "test_id": "BP-INV-007",
+            "description": "Reject boolean carriageway width",
+            "inputs": {
+                "carriageway_width": true,
+                "crash_barrier_width": 0.45,
+                "median_width": 1.2,
+                "no_of_footpaths": 2,
+                "footpath_width": 1.5,
+                "railing_width": 0.3
+            },
+            "expected_error": "ValueError"
+        }
+    ]
+}

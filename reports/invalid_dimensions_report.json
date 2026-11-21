@@ -1,0 +1,70 @@
+{
+    "suite_id": "BP-INVALID-001",
+    "suite_name": "Invalid Bridge Dimension Validation",
+    "operation": "calculate_bridge_width",
+    "timestamp": "2026-11-21T12:08:52.888714+00:00",
+    "summary": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "errors": 0
+    },
+    "results": [
+        {
+            "test_id": "BP-INV-001",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: carriageway_width must be greater than zero"
+        },
+        {
+            "test_id": "BP-INV-002",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: crash_barrier_width must be non-negative"
+        },
+        {
+            "test_id": "BP-INV-003",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: median_width must be non-negative"
+        },
+        {
+            "test_id": "BP-INV-004",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: footpath_width must be non-negative"
+        },
+        {
+            "test_id": "BP-INV-005",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: railing_width must be non-negative"
+        },
+        {
+            "test_id": "BP-INV-006",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: no_of_footpaths must be 0, 1, or 2"
+        },
+        {
+            "test_id": "BP-INV-007",
+            "status": "PASSED",
+            "expected": null,
+            "expected_error": "ValueError",
+            "actual": null,
+            "error": "Expected exception raised: ValueError: carriageway_width must be a finite number"
+        }
+    ]
+}

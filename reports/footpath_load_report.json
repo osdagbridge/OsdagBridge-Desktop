@@ -1,0 +1,56 @@
+{
+    "suite_id": "BP-FOOTPATH-001",
+    "suite_name": "Footpath Load Geometry Verification",
+    "operation": "footpath_load_geometry",
+    "timestamp": "2026-11-21T12:08:52.881712+00:00",
+    "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0
+    },
+    "results": [
+        {
+            "test_id": "BP-FOOTPATH-001",
+            "status": "PASSED",
+            "expected": {
+                "p1": {
+                    "x": 0.3,
+                    "z": 0.0
+                },
+                "p2": {
+                    "x": 1.8,
+                    "z": 0.0
+                },
+                "p3": {
+                    "x": 1.8,
+                    "z": 30.0
+                },
+                "p4": {
+                    "x": 0.3,
+                    "z": 30.0
+                }
+            },
+            "expected_error": null,
+            "actual": {
+                "p1": {
+                    "x": 0.3,
+                    "z": 0.0
+                },
+                "p2": {
+                    "x": 1.8,
+                    "z": 0.0
+                },
+                "p3": {
+                    "x": 1.8,
+                    "z": 30.0
+                },
+                "p4": {
+                    "x": 0.3,
+                    "z": 30.0
+                }
+            },
+            "error": null
+        }
+    ]
+}

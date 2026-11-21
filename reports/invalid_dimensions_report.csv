@@ -1,0 +1,8 @@
+test_id,status,expected,expected_error,actual,error
+BP-INV-001,PASSED,null,ValueError,null,Expected exception raised: ValueError: carriageway_width must be greater than zero
+BP-INV-002,PASSED,null,ValueError,null,Expected exception raised: ValueError: crash_barrier_width must be non-negative
+BP-INV-003,PASSED,null,ValueError,null,Expected exception raised: ValueError: median_width must be non-negative
+BP-INV-004,PASSED,null,ValueError,null,Expected exception raised: ValueError: footpath_width must be non-negative
+BP-INV-005,PASSED,null,ValueError,null,Expected exception raised: ValueError: railing_width must be non-negative
+BP-INV-006,PASSED,null,ValueError,null,"Expected exception raised: ValueError: no_of_footpaths must be 0, 1, or 2"
+BP-INV-007,PASSED,null,ValueError,null,Expected exception raised: ValueError: carriageway_width must be a finite number

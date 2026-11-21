@@ -1,0 +1,56 @@
+{
+    "suite_id": "BP-OVERLAY-001",
+    "suite_name": "Overlay Load Geometry Verification",
+    "operation": "overlay_load_geometry",
+    "timestamp": "2026-11-21T12:08:52.896720+00:00",
+    "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0
+    },
+    "results": [
+        {
+            "test_id": "BP-OVERLAY-001",
+            "status": "PASSED",
+            "expected": {
+                "p1": {
+                    "x": 0.5,
+                    "z": 0.0
+                },
+                "p2": {
+                    "x": 10.9,
+                    "z": 0.0
+                },
+                "p3": {
+                    "x": 10.9,
+                    "z": 30.0
+                },
+                "p4": {
+                    "x": 0.5,
+                    "z": 30.0
+                }
+            },
+            "expected_error": null,
+            "actual": {
+                "p1": {
+                    "x": 0.5,
+                    "z": 0.0
+                },
+                "p2": {
+                    "x": 10.9,
+                    "z": 0.0
+                },
+                "p3": {
+                    "x": 10.9,
+                    "z": 30.0
+                },
+                "p4": {
+                    "x": 0.5,
+                    "z": 30.0
+                }
+            },
+            "error": null
+        }
+    ]
+}

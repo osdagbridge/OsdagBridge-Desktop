@@ -1,0 +1,113 @@
+{
+    "framework": "BridgeProof",
+    "executed_at": "2026-11-21T12:08:52.631656+00:00",
+    "environment": {
+        "python_version": "3.12.5",
+        "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "summary": {
+        "suites": 8,
+        "total": 16,
+        "passed": 16,
+        "failed": 0,
+        "errors": 0
+    },
+    "suite_reports": [
+        {
+            "suite_id": "BP-BARRIER-001",
+            "suite_name": "Crash Barrier Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\crash_barrier_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\crash_barrier_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-DECK-001",
+            "suite_name": "Deck Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\deck_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\deck_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-FOOTPATH-001",
+            "suite_name": "Footpath Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\footpath_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\footpath_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-GEOMETRY-001",
+            "suite_name": "Bridge Cross Section Width Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\geometry_width_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\geometry_width_report.csv",
+            "summary": {
+                "total": 3,
+                "passed": 3,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-INVALID-001",
+            "suite_name": "Invalid Bridge Dimension Validation",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\invalid_dimensions_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\invalid_dimensions_report.csv",
+            "summary": {
+                "total": 7,
+                "passed": 7,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-MEDIAN-001",
+            "suite_name": "Median Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\median_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\median_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-OVERLAY-001",
+            "suite_name": "Overlay Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\overlay_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\overlay_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        },
+        {
+            "suite_id": "BP-RAILING-001",
+            "suite_name": "Railing Load Geometry Verification",
+            "json_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\railing_load_report.json",
+            "csv_report": "C:\\Users\\HP\\Desktop\\OsdagBridge-Desktop-Git\\reports\\railing_load_report.csv",
+            "summary": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0
+            }
+        }
+    ]
+}

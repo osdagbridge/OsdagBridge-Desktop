@@ -1,0 +1,2 @@
+test_id,status,expected,expected_error,actual,error
+BP-MEDIAN-001,PASSED,"{""start"": {""x"": 6.6, ""z"": 0.0}, ""end"": {""x"": 6.6, ""z"": 30.0}}",,"{""start"": {""x"": 6.6, ""z"": 0.0}, ""end"": {""x"": 6.6, ""z"": 30.0}}",
