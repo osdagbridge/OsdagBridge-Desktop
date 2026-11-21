@@ -216,7 +216,8 @@ class AdditionalInputs(QDialog):
             self.findChildren(QPushButton)
         )
         for w in widgets:
-            w.setEnabled(not lock)
+            # Fields the schema disables (e.g. Class A, always included) stay disabled.
+            w.setEnabled(not lock and not w.property("always_disabled"))
             if lock:
                 w.installEventFilter(self)
             else:
@@ -224,7 +225,8 @@ class AdditionalInputs(QDialog):
 
     def _set_enabled(self, widget, enabled: bool):  # setEnabled wrapper used by mode/customize handlers — never re-enables a widget while the dialog is locked
         if widget:
-            widget.setEnabled(bool(enabled) and not getattr(self, "_locked", False))
+            widget.setEnabled(bool(enabled) and not getattr(self, "_locked", False)
+                              and not widget.property("always_disabled"))
 
     def eventFilter(self, obj, event):  # shows "Unlock to Edit" tooltip on click of any locked widget
         if event.type() == QEvent.MouseButtonPress and not obj.isEnabled():

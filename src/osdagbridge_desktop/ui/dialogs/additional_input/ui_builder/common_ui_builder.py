@@ -738,6 +738,8 @@ class UIBuilder(QWidget):
                 field.stateChanged.connect(getattr(owner, on_change))
             if field_def.get("enabled") is False:
                 field.setEnabled(False)
+                # Read by AdditionalInputs.lock() so unlocking does not re-enable it.
+                field.setProperty("always_disabled", True)
             return field
 
         elif ftype == TYPE_TEXTBOX:
@@ -747,6 +749,8 @@ class UIBuilder(QWidget):
                 field.setPlaceholderText(str(placeholder))
             if field_def.get("enabled") is False:
                 field.setEnabled(False)
+                # Read by AdditionalInputs.lock() so unlocking does not re-enable it.
+                field.setProperty("always_disabled", True)
             if field_def.get("read_only"):
                 field.setReadOnly(True)
                 field.setEnabled(False)
