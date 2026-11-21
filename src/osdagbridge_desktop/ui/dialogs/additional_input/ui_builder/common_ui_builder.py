@@ -736,6 +736,8 @@ class UIBuilder(QWidget):
             on_change = field_def.get("on_change") or ""
             if on_change and hasattr(owner, on_change):
                 field.stateChanged.connect(getattr(owner, on_change))
+            if field_def.get("enabled") is False:
+                field.setEnabled(False)
             return field
 
         elif ftype == TYPE_TEXTBOX:

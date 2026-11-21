@@ -613,11 +613,11 @@ def resolve_live_load_definitions(output_dict: dict) -> dict | None:
     # ── Vehicle Classes ───────────────────────────────────────────────────
     VEHICLE_KEYS = [
         ("Class A",           KEY_LL_IRC_CLASS_A),
-        ("Class AA Wheeled",  KEY_LL_IRC_AA_WHEELED),
-        ("Class AA Tracked",  KEY_LL_IRC_AA_TRACKED),
+        # ("Class AA Wheeled",  KEY_LL_IRC_AA_WHEELED),
+        # ("Class AA Tracked",  KEY_LL_IRC_AA_TRACKED),
         ("Class 70R Wheeled", KEY_LL_IRC_70R_WHEELED),
         ("Class 70R Tracked", KEY_LL_IRC_70R_TRACKED),
-        ("Class 70R Bogie",   KEY_LL_IRC_70R_BOGIE),
+        # ("Class 70R Bogie",   KEY_LL_IRC_70R_BOGIE),
         ("Class SV",          KEY_LL_IRC_CLASS_SV),
         ("Class Fatigue",     KEY_LL_IRC_CLASS_FATIGUE),
     ]
@@ -628,11 +628,11 @@ def resolve_live_load_definitions(output_dict: dict) -> dict | None:
     # Class SV, which is an independent opt-in with its own key.
     BREAKING_LOAD_KEYS = [
         ("Breaking Load : Class A",           KEY_LL_IRC_CLASS_A),
-        ("Breaking Load : Class AA Wheeled",  KEY_LL_IRC_AA_WHEELED),
-        ("Breaking Load : Class AA Tracked",  KEY_LL_IRC_AA_TRACKED),
+        # ("Breaking Load : Class AA Wheeled",  KEY_LL_IRC_AA_WHEELED),
+        # ("Breaking Load : Class AA Tracked",  KEY_LL_IRC_AA_TRACKED),
         ("Breaking Load : Class 70R Wheeled", KEY_LL_IRC_70R_WHEELED),
         ("Breaking Load : Class 70R Tracked", KEY_LL_IRC_70R_TRACKED),
-        ("Breaking Load : Class 70R Bogie",   KEY_LL_IRC_70R_BOGIE),
+        # ("Breaking Load : Class 70R Bogie",   KEY_LL_IRC_70R_BOGIE),
         ("Breaking Load : Class SV",          KEY_BL_IRC_CLASS_SV),
         ("Breaking Load : Class Fatigue",     KEY_LL_IRC_CLASS_FATIGUE),
     ]
