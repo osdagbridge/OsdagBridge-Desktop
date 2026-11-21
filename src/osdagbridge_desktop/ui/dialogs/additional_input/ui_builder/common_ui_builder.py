@@ -608,6 +608,7 @@ class UIBuilder(QWidget):
             fields = row.get("fields") or []
             col = 0
             for field_def in fields:
+                if field_def.get("id") in (KEY_LL_IRC_AA_WHEELED, KEY_LL_IRC_AA_TRACKED, KEY_LL_IRC_70R_BOGIE): continue
                 ftype = field_def.get("type")
 
                 if not ftype:
@@ -720,6 +721,7 @@ class UIBuilder(QWidget):
             field = QCheckBox(label_text)
             field.setObjectName(field_def.get("id"))
             field.setChecked(field_def.get("default_checked", False))
+            if field_def.get("id") == KEY_LL_IRC_CLASS_A: field.setEnabled(False)
             field.setStyleSheet("""
                 QCheckBox { font-size: 11px; color: #333; spacing: 6px; }
                 QCheckBox:disabled { font-size: 11px; color: #aaaaaa; spacing: 6px; }

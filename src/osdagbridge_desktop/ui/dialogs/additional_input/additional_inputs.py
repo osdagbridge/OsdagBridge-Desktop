@@ -274,6 +274,7 @@ class AdditionalInputs(QDialog):
         Called at init time (from set_input_dictionary) when working_input_dict
         is a fresh copy of the defaults. NOT used by the Defaults button.
         """
+        self.working_input_dict[KEY_BL_IRC_CLASS_SV] = False
         for widget in self.findChildren(QWidget):
             name = widget.objectName()
             if not name or name not in self.working_input_dict:
