@@ -71,7 +71,9 @@ class CADSafetyGuard:
                 for ais in items:
                     n_ais += 1
                     try:
-                        if ctx.IsDisplayed(ais):
+                        # HasInteractiveContext, not IsDisplayed: hidden (erased) AIS
+                        # are still in the context and must be removed too.
+                        if ais.HasInteractiveContext():
                             ctx.Remove(ais, False)
                     except Exception:
                         pass
@@ -110,7 +112,7 @@ class CADSafetyGuard:
                 except Exception:
                     pass
                 try:
-                    if ctx is not None and ctx.IsDisplayed(ais):
+                    if ctx is not None and ais.HasInteractiveContext():
                         ctx.Remove(ais, False)
                 except Exception:
                     pass
